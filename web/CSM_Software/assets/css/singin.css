@@ -1,0 +1,51 @@
+body {
+  background: url("../../assets/img/fondoLogin.svg") no-repeat center center
+    fixed ;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+.logoUFPS {
+  width: 25vw;
+  position: relative;
+}
+.logoUFPS img {
+  width: 100%;
+  position: absolute;
+  top: 23em;
+  left: 11em;
+}
+.iniciarsession{
+  width: 20vw;
+}
+.item{
+  width: 100%;
+}
+.prsi{
+  top: 0em;
+  right: 0em;
+}
+.fbr{
+  border-radius: 20px;
+}
+.brlogin{
+  border-radius: 50px !important;
+}
+.cuerpologin{
+  width: 100vw !important;
+  height: 100vh !important;
+}
+.prlogin{
+  position: relative;
+  top: -8em;
+}
+.plogin{
+  padding: 4em;
+}
+.gbcolor{
+  background-color: rgba(242, 242, 242, 0.50);
+}
+.singin::placeholder{
+  text-align: center !important;
+}

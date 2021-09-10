@@ -1,0 +1,24 @@
+.mth2{
+    font-size: 17px !important;
+    font-weight: bold;
+}
+.mt17{
+    font-size: 17px !important;
+}
+.mtittle{
+    font-size: 3em !important;
+    font-weight:bold !important;
+
+}
+html{
+    scroll-behavior: smooth;
+}
+.mprn{
+    position: absolute;
+    top: 6em;
+}
+.mprph{
+    position: absolute;
+    top: 2em;
+    right: 22em;
+}

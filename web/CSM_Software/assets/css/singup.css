@@ -1,0 +1,50 @@
+body {
+    background: url("../../assets/img/fondoRegistro.svg") no-repeat center center
+      fixed ;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+  }
+  .logoUFPS {
+    width: 65%;
+  }
+  .iniciarsession{
+    width: 20vw;
+  }
+  .item{
+    width: 100%;
+  }
+  .prsi{
+    top: 0em;
+    right: 0em;
+  }
+  .fbr{
+    border-radius: 20px;
+  }
+  .brlogin{
+    border-radius: 50px !important;
+  }
+  .cuerpologin{
+    width: 99vw !important;
+    height: 99vh !important;
+  }
+  .plogin{
+    padding: 1em 2em;
+  }
+  .gbcolor{
+    background-color: rgba(242, 242, 242, 0.50);
+  }
+  .singin::placeholder{
+    text-align: center !important;
+  }
+  .vh-20{
+    height: 20vh;
+  }
+  .t-white{
+    color: white;
+    font-size: 4em !important;
+  }
+  .account{
+    width: 15%;
+  }
