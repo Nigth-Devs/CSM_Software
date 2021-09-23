@@ -13,7 +13,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import dto.Materia;
-import dto.TipoAsignatura;
+import dto.TipoMateria;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -21,11 +21,11 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
-public class TipoAsignaturaJpaController implements Serializable {
+public class TipoMateriaJpaController implements Serializable {
 
-    public TipoAsignaturaJpaController(EntityManagerFactory emf) {
+    public TipoMateriaJpaController(EntityManagerFactory emf) {
         this.emf = emf;
     }
     private EntityManagerFactory emf = null;
@@ -34,28 +34,28 @@ public class TipoAsignaturaJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(TipoAsignatura tipoAsignatura) {
-        if (tipoAsignatura.getMateriaList() == null) {
-            tipoAsignatura.setMateriaList(new ArrayList<>());
+    public void create(TipoMateria tipoMateria) {
+        if (tipoMateria.getMateriaList() == null) {
+            tipoMateria.setMateriaList(new ArrayList<Materia>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Materia> attachedMateriaList = new ArrayList<>();
-            for (Materia materiaListMateriaToAttach : tipoAsignatura.getMateriaList()) {
+            List<Materia> attachedMateriaList = new ArrayList<Materia>();
+            for (Materia materiaListMateriaToAttach : tipoMateria.getMateriaList()) {
                 materiaListMateriaToAttach = em.getReference(materiaListMateriaToAttach.getClass(), materiaListMateriaToAttach.getMateriaPK());
                 attachedMateriaList.add(materiaListMateriaToAttach);
             }
-            tipoAsignatura.setMateriaList(attachedMateriaList);
-            em.persist(tipoAsignatura);
-            for (Materia materiaListMateria : tipoAsignatura.getMateriaList()) {
-                TipoAsignatura oldTipoAsignaturaIdOfMateriaListMateria = materiaListMateria.getTipoAsignaturaId();
-                materiaListMateria.setTipoAsignaturaId(tipoAsignatura);
+            tipoMateria.setMateriaList(attachedMateriaList);
+            em.persist(tipoMateria);
+            for (Materia materiaListMateria : tipoMateria.getMateriaList()) {
+                TipoMateria oldTipoIdOfMateriaListMateria = materiaListMateria.getTipoId();
+                materiaListMateria.setTipoId(tipoMateria);
                 materiaListMateria = em.merge(materiaListMateria);
-                if (oldTipoAsignaturaIdOfMateriaListMateria != null) {
-                    oldTipoAsignaturaIdOfMateriaListMateria.getMateriaList().remove(materiaListMateria);
-                    oldTipoAsignaturaIdOfMateriaListMateria = em.merge(oldTipoAsignaturaIdOfMateriaListMateria);
+                if (oldTipoIdOfMateriaListMateria != null) {
+                    oldTipoIdOfMateriaListMateria.getMateriaList().remove(materiaListMateria);
+                    oldTipoIdOfMateriaListMateria = em.merge(oldTipoIdOfMateriaListMateria);
                 }
             }
             em.getTransaction().commit();
@@ -66,42 +66,42 @@ public class TipoAsignaturaJpaController implements Serializable {
         }
     }
 
-    public void edit(TipoAsignatura tipoAsignatura) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(TipoMateria tipoMateria) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            TipoAsignatura persistentTipoAsignatura = em.find(TipoAsignatura.class, tipoAsignatura.getId());
-            List<Materia> materiaListOld = persistentTipoAsignatura.getMateriaList();
-            List<Materia> materiaListNew = tipoAsignatura.getMateriaList();
+            TipoMateria persistentTipoMateria = em.find(TipoMateria.class, tipoMateria.getId());
+            List<Materia> materiaListOld = persistentTipoMateria.getMateriaList();
+            List<Materia> materiaListNew = tipoMateria.getMateriaList();
             List<String> illegalOrphanMessages = null;
             for (Materia materiaListOldMateria : materiaListOld) {
                 if (!materiaListNew.contains(materiaListOldMateria)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain Materia " + materiaListOldMateria + " since its tipoAsignaturaId field is not nullable.");
+                    illegalOrphanMessages.add("You must retain Materia " + materiaListOldMateria + " since its tipoId field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Materia> attachedMateriaListNew = new ArrayList<>();
+            List<Materia> attachedMateriaListNew = new ArrayList<Materia>();
             for (Materia materiaListNewMateriaToAttach : materiaListNew) {
                 materiaListNewMateriaToAttach = em.getReference(materiaListNewMateriaToAttach.getClass(), materiaListNewMateriaToAttach.getMateriaPK());
                 attachedMateriaListNew.add(materiaListNewMateriaToAttach);
             }
             materiaListNew = attachedMateriaListNew;
-            tipoAsignatura.setMateriaList(materiaListNew);
-            tipoAsignatura = em.merge(tipoAsignatura);
+            tipoMateria.setMateriaList(materiaListNew);
+            tipoMateria = em.merge(tipoMateria);
             for (Materia materiaListNewMateria : materiaListNew) {
                 if (!materiaListOld.contains(materiaListNewMateria)) {
-                    TipoAsignatura oldTipoAsignaturaIdOfMateriaListNewMateria = materiaListNewMateria.getTipoAsignaturaId();
-                    materiaListNewMateria.setTipoAsignaturaId(tipoAsignatura);
+                    TipoMateria oldTipoIdOfMateriaListNewMateria = materiaListNewMateria.getTipoId();
+                    materiaListNewMateria.setTipoId(tipoMateria);
                     materiaListNewMateria = em.merge(materiaListNewMateria);
-                    if (oldTipoAsignaturaIdOfMateriaListNewMateria != null && !oldTipoAsignaturaIdOfMateriaListNewMateria.equals(tipoAsignatura)) {
-                        oldTipoAsignaturaIdOfMateriaListNewMateria.getMateriaList().remove(materiaListNewMateria);
-                        oldTipoAsignaturaIdOfMateriaListNewMateria = em.merge(oldTipoAsignaturaIdOfMateriaListNewMateria);
+                    if (oldTipoIdOfMateriaListNewMateria != null && !oldTipoIdOfMateriaListNewMateria.equals(tipoMateria)) {
+                        oldTipoIdOfMateriaListNewMateria.getMateriaList().remove(materiaListNewMateria);
+                        oldTipoIdOfMateriaListNewMateria = em.merge(oldTipoIdOfMateriaListNewMateria);
                     }
                 }
             }
@@ -109,9 +109,9 @@ public class TipoAsignaturaJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = tipoAsignatura.getId();
-                if (findTipoAsignatura(id) == null) {
-                    throw new NonexistentEntityException("The tipoAsignatura with id " + id + " no longer exists.");
+                Integer id = tipoMateria.getId();
+                if (findTipoMateria(id) == null) {
+                    throw new NonexistentEntityException("The tipoMateria with id " + id + " no longer exists.");
                 }
             }
             throw ex;
@@ -127,25 +127,25 @@ public class TipoAsignaturaJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            TipoAsignatura tipoAsignatura;
+            TipoMateria tipoMateria;
             try {
-                tipoAsignatura = em.getReference(TipoAsignatura.class, id);
-                tipoAsignatura.getId();
+                tipoMateria = em.getReference(TipoMateria.class, id);
+                tipoMateria.getId();
             } catch (EntityNotFoundException enfe) {
-                throw new NonexistentEntityException("The tipoAsignatura with id " + id + " no longer exists.", enfe);
+                throw new NonexistentEntityException("The tipoMateria with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
-            List<Materia> materiaListOrphanCheck = tipoAsignatura.getMateriaList();
+            List<Materia> materiaListOrphanCheck = tipoMateria.getMateriaList();
             for (Materia materiaListOrphanCheckMateria : materiaListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This TipoAsignatura (" + tipoAsignatura + ") cannot be destroyed since the Materia " + materiaListOrphanCheckMateria + " in its materiaList field has a non-nullable tipoAsignaturaId field.");
+                illegalOrphanMessages.add("This TipoMateria (" + tipoMateria + ") cannot be destroyed since the Materia " + materiaListOrphanCheckMateria + " in its materiaList field has a non-nullable tipoId field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            em.remove(tipoAsignatura);
+            em.remove(tipoMateria);
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -154,19 +154,19 @@ public class TipoAsignaturaJpaController implements Serializable {
         }
     }
 
-    public List<TipoAsignatura> findTipoAsignaturaEntities() {
-        return findTipoAsignaturaEntities(true, -1, -1);
+    public List<TipoMateria> findTipoMateriaEntities() {
+        return findTipoMateriaEntities(true, -1, -1);
     }
 
-    public List<TipoAsignatura> findTipoAsignaturaEntities(int maxResults, int firstResult) {
-        return findTipoAsignaturaEntities(false, maxResults, firstResult);
+    public List<TipoMateria> findTipoMateriaEntities(int maxResults, int firstResult) {
+        return findTipoMateriaEntities(false, maxResults, firstResult);
     }
 
-    private List<TipoAsignatura> findTipoAsignaturaEntities(boolean all, int maxResults, int firstResult) {
+    private List<TipoMateria> findTipoMateriaEntities(boolean all, int maxResults, int firstResult) {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            cq.select(cq.from(TipoAsignatura.class));
+            cq.select(cq.from(TipoMateria.class));
             Query q = em.createQuery(cq);
             if (!all) {
                 q.setMaxResults(maxResults);
@@ -178,20 +178,20 @@ public class TipoAsignaturaJpaController implements Serializable {
         }
     }
 
-    public TipoAsignatura findTipoAsignatura(Integer id) {
+    public TipoMateria findTipoMateria(Integer id) {
         EntityManager em = getEntityManager();
         try {
-            return em.find(TipoAsignatura.class, id);
+            return em.find(TipoMateria.class, id);
         } finally {
             em.close();
         }
     }
 
-    public int getTipoAsignaturaCount() {
+    public int getTipoMateriaCount() {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            Root<TipoAsignatura> rt = cq.from(TipoAsignatura.class);
+            Root<TipoMateria> rt = cq.from(TipoMateria.class);
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
@@ -199,5 +199,5 @@ public class TipoAsignaturaJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

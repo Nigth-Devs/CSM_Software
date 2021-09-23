@@ -8,24 +8,23 @@ package dao;
 import dao.exceptions.IllegalOrphanException;
 import dao.exceptions.NonexistentEntityException;
 import dao.exceptions.PreexistingEntityException;
+import dto.Docente;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import dto.Departamento;
-import dto.Docente;
 import dto.Programa;
+import dto.Usuario;
+import dto.MateriaPeriodoGrupo;
 import java.util.ArrayList;
 import java.util.List;
-import dto.MateriaPeriodoGrupo;
-import dto.Usuario;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class DocenteJpaController implements Serializable {
 
@@ -39,77 +38,55 @@ public class DocenteJpaController implements Serializable {
     }
 
     public void create(Docente docente) throws PreexistingEntityException, Exception {
-        if (docente.getProgramaList() == null) {
-            docente.setProgramaList(new ArrayList<>());
-        }
         if (docente.getMateriaPeriodoGrupoList() == null) {
-            docente.setMateriaPeriodoGrupoList(new ArrayList<>());
-        }
-        if (docente.getUsuarioList() == null) {
-            docente.setUsuarioList(new ArrayList<>());
+            docente.setMateriaPeriodoGrupoList(new ArrayList<MateriaPeriodoGrupo>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Departamento departamentoId = docente.getDepartamentoId();
-            if (departamentoId != null) {
-                departamentoId = em.getReference(departamentoId.getClass(), departamentoId.getId());
-                docente.setDepartamentoId(departamentoId);
+            Programa programaCodigo = docente.getProgramaCodigo();
+            if (programaCodigo != null) {
+                programaCodigo = em.getReference(programaCodigo.getClass(), programaCodigo.getCodigo());
+                docente.setProgramaCodigo(programaCodigo);
             }
-            List<Programa> attachedProgramaList = new ArrayList<>();
-            for (Programa programaListProgramaToAttach : docente.getProgramaList()) {
-                programaListProgramaToAttach = em.getReference(programaListProgramaToAttach.getClass(), programaListProgramaToAttach.getCodigo());
-                attachedProgramaList.add(programaListProgramaToAttach);
+            Usuario usuario = docente.getUsuario();
+            if (usuario != null) {
+                usuario = em.getReference(usuario.getClass(), usuario.getDocenteCodigo());
+                docente.setUsuario(usuario);
             }
-            docente.setProgramaList(attachedProgramaList);
-            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoList = new ArrayList<>();
+            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoList = new ArrayList<MateriaPeriodoGrupo>();
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach : docente.getMateriaPeriodoGrupoList()) {
-                materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getMateriaPeriodoGrupoPK());
+                materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getId());
                 attachedMateriaPeriodoGrupoList.add(materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach);
             }
             docente.setMateriaPeriodoGrupoList(attachedMateriaPeriodoGrupoList);
-            List<Usuario> attachedUsuarioList = new ArrayList<>();
-            for (Usuario usuarioListUsuarioToAttach : docente.getUsuarioList()) {
-                usuarioListUsuarioToAttach = em.getReference(usuarioListUsuarioToAttach.getClass(), usuarioListUsuarioToAttach.getUsuarioPK());
-                attachedUsuarioList.add(usuarioListUsuarioToAttach);
-            }
-            docente.setUsuarioList(attachedUsuarioList);
             em.persist(docente);
-            if (departamentoId != null) {
-                departamentoId.getDocenteList().add(docente);
-                departamentoId = em.merge(departamentoId);
+            if (programaCodigo != null) {
+                programaCodigo.getDocenteList().add(docente);
+                programaCodigo = em.merge(programaCodigo);
             }
-            for (Programa programaListPrograma : docente.getProgramaList()) {
-                Docente oldDirectorProgramaOfProgramaListPrograma = programaListPrograma.getDirectorPrograma();
-                programaListPrograma.setDirectorPrograma(docente);
-                programaListPrograma = em.merge(programaListPrograma);
-                if (oldDirectorProgramaOfProgramaListPrograma != null) {
-                    oldDirectorProgramaOfProgramaListPrograma.getProgramaList().remove(programaListPrograma);
-                    oldDirectorProgramaOfProgramaListPrograma = em.merge(oldDirectorProgramaOfProgramaListPrograma);
+            if (usuario != null) {
+                Docente oldDocenteOfUsuario = usuario.getDocente();
+                if (oldDocenteOfUsuario != null) {
+                    oldDocenteOfUsuario.setUsuario(null);
+                    oldDocenteOfUsuario = em.merge(oldDocenteOfUsuario);
                 }
+                usuario.setDocente(docente);
+                usuario = em.merge(usuario);
             }
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListMateriaPeriodoGrupo : docente.getMateriaPeriodoGrupoList()) {
-                Docente oldDocenteOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = materiaPeriodoGrupoListMateriaPeriodoGrupo.getDocente();
-                materiaPeriodoGrupoListMateriaPeriodoGrupo.setDocente(docente);
+                Docente oldDocenteCodigoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = materiaPeriodoGrupoListMateriaPeriodoGrupo.getDocenteCodigo();
+                materiaPeriodoGrupoListMateriaPeriodoGrupo.setDocenteCodigo(docente);
                 materiaPeriodoGrupoListMateriaPeriodoGrupo = em.merge(materiaPeriodoGrupoListMateriaPeriodoGrupo);
-                if (oldDocenteOfMateriaPeriodoGrupoListMateriaPeriodoGrupo != null) {
-                    oldDocenteOfMateriaPeriodoGrupoListMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListMateriaPeriodoGrupo);
-                    oldDocenteOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = em.merge(oldDocenteOfMateriaPeriodoGrupoListMateriaPeriodoGrupo);
-                }
-            }
-            for (Usuario usuarioListUsuario : docente.getUsuarioList()) {
-                Docente oldDocenteOfUsuarioListUsuario = usuarioListUsuario.getDocente();
-                usuarioListUsuario.setDocente(docente);
-                usuarioListUsuario = em.merge(usuarioListUsuario);
-                if (oldDocenteOfUsuarioListUsuario != null) {
-                    oldDocenteOfUsuarioListUsuario.getUsuarioList().remove(usuarioListUsuario);
-                    oldDocenteOfUsuarioListUsuario = em.merge(oldDocenteOfUsuarioListUsuario);
+                if (oldDocenteCodigoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo != null) {
+                    oldDocenteCodigoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListMateriaPeriodoGrupo);
+                    oldDocenteCodigoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = em.merge(oldDocenteCodigoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo);
                 }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
-            if (findDocente(docente.getCodigoDocente()) != null) {
+            if (findDocente(docente.getCodigo()) != null) {
                 throw new PreexistingEntityException("Docente " + docente + " already exists.", ex);
             }
             throw ex;
@@ -125,107 +102,72 @@ public class DocenteJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Docente persistentDocente = em.find(Docente.class, docente.getCodigoDocente());
-            Departamento departamentoIdOld = persistentDocente.getDepartamentoId();
-            Departamento departamentoIdNew = docente.getDepartamentoId();
-            List<Programa> programaListOld = persistentDocente.getProgramaList();
-            List<Programa> programaListNew = docente.getProgramaList();
+            Docente persistentDocente = em.find(Docente.class, docente.getCodigo());
+            Programa programaCodigoOld = persistentDocente.getProgramaCodigo();
+            Programa programaCodigoNew = docente.getProgramaCodigo();
+            Usuario usuarioOld = persistentDocente.getUsuario();
+            Usuario usuarioNew = docente.getUsuario();
             List<MateriaPeriodoGrupo> materiaPeriodoGrupoListOld = persistentDocente.getMateriaPeriodoGrupoList();
             List<MateriaPeriodoGrupo> materiaPeriodoGrupoListNew = docente.getMateriaPeriodoGrupoList();
-            List<Usuario> usuarioListOld = persistentDocente.getUsuarioList();
-            List<Usuario> usuarioListNew = docente.getUsuarioList();
             List<String> illegalOrphanMessages = null;
-            for (Programa programaListOldPrograma : programaListOld) {
-                if (!programaListNew.contains(programaListOldPrograma)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
-                    }
-                    illegalOrphanMessages.add("You must retain Programa " + programaListOldPrograma + " since its directorPrograma field is not nullable.");
+            if (usuarioOld != null && !usuarioOld.equals(usuarioNew)) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
+                illegalOrphanMessages.add("You must retain Usuario " + usuarioOld + " since its docente field is not nullable.");
             }
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListOldMateriaPeriodoGrupo : materiaPeriodoGrupoListOld) {
                 if (!materiaPeriodoGrupoListNew.contains(materiaPeriodoGrupoListOldMateriaPeriodoGrupo)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain MateriaPeriodoGrupo " + materiaPeriodoGrupoListOldMateriaPeriodoGrupo + " since its docente field is not nullable.");
-                }
-            }
-            for (Usuario usuarioListOldUsuario : usuarioListOld) {
-                if (!usuarioListNew.contains(usuarioListOldUsuario)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
-                    }
-                    illegalOrphanMessages.add("You must retain Usuario " + usuarioListOldUsuario + " since its docente field is not nullable.");
+                    illegalOrphanMessages.add("You must retain MateriaPeriodoGrupo " + materiaPeriodoGrupoListOldMateriaPeriodoGrupo + " since its docenteCodigo field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (departamentoIdNew != null) {
-                departamentoIdNew = em.getReference(departamentoIdNew.getClass(), departamentoIdNew.getId());
-                docente.setDepartamentoId(departamentoIdNew);
+            if (programaCodigoNew != null) {
+                programaCodigoNew = em.getReference(programaCodigoNew.getClass(), programaCodigoNew.getCodigo());
+                docente.setProgramaCodigo(programaCodigoNew);
             }
-            List<Programa> attachedProgramaListNew = new ArrayList<>();
-            for (Programa programaListNewProgramaToAttach : programaListNew) {
-                programaListNewProgramaToAttach = em.getReference(programaListNewProgramaToAttach.getClass(), programaListNewProgramaToAttach.getCodigo());
-                attachedProgramaListNew.add(programaListNewProgramaToAttach);
+            if (usuarioNew != null) {
+                usuarioNew = em.getReference(usuarioNew.getClass(), usuarioNew.getDocenteCodigo());
+                docente.setUsuario(usuarioNew);
             }
-            programaListNew = attachedProgramaListNew;
-            docente.setProgramaList(programaListNew);
-            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoListNew = new ArrayList<>();
+            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoListNew = new ArrayList<MateriaPeriodoGrupo>();
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach : materiaPeriodoGrupoListNew) {
-                materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getMateriaPeriodoGrupoPK());
+                materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getId());
                 attachedMateriaPeriodoGrupoListNew.add(materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach);
             }
             materiaPeriodoGrupoListNew = attachedMateriaPeriodoGrupoListNew;
             docente.setMateriaPeriodoGrupoList(materiaPeriodoGrupoListNew);
-            List<Usuario> attachedUsuarioListNew = new ArrayList<>();
-            for (Usuario usuarioListNewUsuarioToAttach : usuarioListNew) {
-                usuarioListNewUsuarioToAttach = em.getReference(usuarioListNewUsuarioToAttach.getClass(), usuarioListNewUsuarioToAttach.getUsuarioPK());
-                attachedUsuarioListNew.add(usuarioListNewUsuarioToAttach);
-            }
-            usuarioListNew = attachedUsuarioListNew;
-            docente.setUsuarioList(usuarioListNew);
             docente = em.merge(docente);
-            if (departamentoIdOld != null && !departamentoIdOld.equals(departamentoIdNew)) {
-                departamentoIdOld.getDocenteList().remove(docente);
-                departamentoIdOld = em.merge(departamentoIdOld);
+            if (programaCodigoOld != null && !programaCodigoOld.equals(programaCodigoNew)) {
+                programaCodigoOld.getDocenteList().remove(docente);
+                programaCodigoOld = em.merge(programaCodigoOld);
             }
-            if (departamentoIdNew != null && !departamentoIdNew.equals(departamentoIdOld)) {
-                departamentoIdNew.getDocenteList().add(docente);
-                departamentoIdNew = em.merge(departamentoIdNew);
+            if (programaCodigoNew != null && !programaCodigoNew.equals(programaCodigoOld)) {
+                programaCodigoNew.getDocenteList().add(docente);
+                programaCodigoNew = em.merge(programaCodigoNew);
             }
-            for (Programa programaListNewPrograma : programaListNew) {
-                if (!programaListOld.contains(programaListNewPrograma)) {
-                    Docente oldDirectorProgramaOfProgramaListNewPrograma = programaListNewPrograma.getDirectorPrograma();
-                    programaListNewPrograma.setDirectorPrograma(docente);
-                    programaListNewPrograma = em.merge(programaListNewPrograma);
-                    if (oldDirectorProgramaOfProgramaListNewPrograma != null && !oldDirectorProgramaOfProgramaListNewPrograma.equals(docente)) {
-                        oldDirectorProgramaOfProgramaListNewPrograma.getProgramaList().remove(programaListNewPrograma);
-                        oldDirectorProgramaOfProgramaListNewPrograma = em.merge(oldDirectorProgramaOfProgramaListNewPrograma);
-                    }
+            if (usuarioNew != null && !usuarioNew.equals(usuarioOld)) {
+                Docente oldDocenteOfUsuario = usuarioNew.getDocente();
+                if (oldDocenteOfUsuario != null) {
+                    oldDocenteOfUsuario.setUsuario(null);
+                    oldDocenteOfUsuario = em.merge(oldDocenteOfUsuario);
                 }
+                usuarioNew.setDocente(docente);
+                usuarioNew = em.merge(usuarioNew);
             }
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListNewMateriaPeriodoGrupo : materiaPeriodoGrupoListNew) {
                 if (!materiaPeriodoGrupoListOld.contains(materiaPeriodoGrupoListNewMateriaPeriodoGrupo)) {
-                    Docente oldDocenteOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = materiaPeriodoGrupoListNewMateriaPeriodoGrupo.getDocente();
-                    materiaPeriodoGrupoListNewMateriaPeriodoGrupo.setDocente(docente);
+                    Docente oldDocenteCodigoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = materiaPeriodoGrupoListNewMateriaPeriodoGrupo.getDocenteCodigo();
+                    materiaPeriodoGrupoListNewMateriaPeriodoGrupo.setDocenteCodigo(docente);
                     materiaPeriodoGrupoListNewMateriaPeriodoGrupo = em.merge(materiaPeriodoGrupoListNewMateriaPeriodoGrupo);
-                    if (oldDocenteOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo != null && !oldDocenteOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.equals(docente)) {
-                        oldDocenteOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListNewMateriaPeriodoGrupo);
-                        oldDocenteOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = em.merge(oldDocenteOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo);
-                    }
-                }
-            }
-            for (Usuario usuarioListNewUsuario : usuarioListNew) {
-                if (!usuarioListOld.contains(usuarioListNewUsuario)) {
-                    Docente oldDocenteOfUsuarioListNewUsuario = usuarioListNewUsuario.getDocente();
-                    usuarioListNewUsuario.setDocente(docente);
-                    usuarioListNewUsuario = em.merge(usuarioListNewUsuario);
-                    if (oldDocenteOfUsuarioListNewUsuario != null && !oldDocenteOfUsuarioListNewUsuario.equals(docente)) {
-                        oldDocenteOfUsuarioListNewUsuario.getUsuarioList().remove(usuarioListNewUsuario);
-                        oldDocenteOfUsuarioListNewUsuario = em.merge(oldDocenteOfUsuarioListNewUsuario);
+                    if (oldDocenteCodigoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo != null && !oldDocenteCodigoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.equals(docente)) {
+                        oldDocenteCodigoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListNewMateriaPeriodoGrupo);
+                        oldDocenteCodigoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = em.merge(oldDocenteCodigoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo);
                     }
                 }
             }
@@ -233,7 +175,7 @@ public class DocenteJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = docente.getCodigoDocente();
+                Integer id = docente.getCodigo();
                 if (findDocente(id) == null) {
                     throw new NonexistentEntityException("The docente with id " + id + " no longer exists.");
                 }
@@ -254,39 +196,32 @@ public class DocenteJpaController implements Serializable {
             Docente docente;
             try {
                 docente = em.getReference(Docente.class, id);
-                docente.getCodigoDocente();
+                docente.getCodigo();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The docente with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
-            List<Programa> programaListOrphanCheck = docente.getProgramaList();
-            for (Programa programaListOrphanCheckPrograma : programaListOrphanCheck) {
+            Usuario usuarioOrphanCheck = docente.getUsuario();
+            if (usuarioOrphanCheck != null) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This Docente (" + docente + ") cannot be destroyed since the Programa " + programaListOrphanCheckPrograma + " in its programaList field has a non-nullable directorPrograma field.");
+                illegalOrphanMessages.add("This Docente (" + docente + ") cannot be destroyed since the Usuario " + usuarioOrphanCheck + " in its usuario field has a non-nullable docente field.");
             }
             List<MateriaPeriodoGrupo> materiaPeriodoGrupoListOrphanCheck = docente.getMateriaPeriodoGrupoList();
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListOrphanCheckMateriaPeriodoGrupo : materiaPeriodoGrupoListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This Docente (" + docente + ") cannot be destroyed since the MateriaPeriodoGrupo " + materiaPeriodoGrupoListOrphanCheckMateriaPeriodoGrupo + " in its materiaPeriodoGrupoList field has a non-nullable docente field.");
-            }
-            List<Usuario> usuarioListOrphanCheck = docente.getUsuarioList();
-            for (Usuario usuarioListOrphanCheckUsuario : usuarioListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
-                }
-                illegalOrphanMessages.add("This Docente (" + docente + ") cannot be destroyed since the Usuario " + usuarioListOrphanCheckUsuario + " in its usuarioList field has a non-nullable docente field.");
+                illegalOrphanMessages.add("This Docente (" + docente + ") cannot be destroyed since the MateriaPeriodoGrupo " + materiaPeriodoGrupoListOrphanCheckMateriaPeriodoGrupo + " in its materiaPeriodoGrupoList field has a non-nullable docenteCodigo field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            Departamento departamentoId = docente.getDepartamentoId();
-            if (departamentoId != null) {
-                departamentoId.getDocenteList().remove(docente);
-                departamentoId = em.merge(departamentoId);
+            Programa programaCodigo = docente.getProgramaCodigo();
+            if (programaCodigo != null) {
+                programaCodigo.getDocenteList().remove(docente);
+                programaCodigo = em.merge(programaCodigo);
             }
             em.remove(docente);
             em.getTransaction().commit();
@@ -342,5 +277,5 @@ public class DocenteJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

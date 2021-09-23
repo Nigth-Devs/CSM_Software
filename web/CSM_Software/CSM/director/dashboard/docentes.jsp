@@ -9,7 +9,7 @@
 <%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -73,7 +73,7 @@
                         <div class="ml-md-auto">
                             <ul class="breadcrumbs">
                                 <li class="nav-home">
-                                    <a href="dashboard.jsp">
+                                    <a href="<%=request.getContextPath()%>/CSM_Software/CSM/director/dashboard/dashboard.jsp">
                                         <i class="flaticon-home"></i>
                                     </a>
                                 </li>
@@ -95,8 +95,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table id="basic-datatables"
-                                            class="display table table-striped table-hover text-center">
+                                        <table id="basic-datatables" class="display table table-striped table-hover text-center">
                                             <thead>
                                                 <tr>
                                                     <th>Código Docente</th>
@@ -118,41 +117,40 @@
                                                         List<Docente> docentes = (List<Docente>) request.getSession().getAttribute("listaDocentes");
                                                         Usuario u = (Usuario) request.getSession().getAttribute("usuario");
                                                         for (Docente teacher : docentes) {
-                                                            if (u.getDocente().getDepartamentoId().getId() == teacher.getDepartamentoId().getId()) {
+                                                            if (teacher.getUsuario().getRolId().getId() != 1 && u.getDocente().getProgramaCodigo().getDepartamentoId().equals(teacher.getProgramaCodigo().getDepartamentoId())) {
                                                     %>
                                                 <tr>
-                                                    <td><%= teacher.getCodigoDocente()%></td>
+                                                    <td><%= teacher.getCodigo()%></td>
                                                     <td><%= teacher.getNombre() + " " + teacher.getApellido()%></td>
                                                     <td><label
-                                                            id="label-<%=teacher.getCodigoDocente()%>"><%=(teacher.getEstado() == 1) ? "Activo" : "Inactivo"%><label>
+                                                            id="label-<%=teacher.getCodigo()%>"><%=(teacher.getEstado() == 1) ? "Activo" : "Inactivo"%><label>
                                                     </td>
                                                     <td>
                                                         <div class="switch-button">
                                                             <%if (teacher.getEstado() == 1) {%>
                                                             <button class="btn btn-primary btn-link">
                                                                 <input class="switch-button__checkbox" type="checkbox"
-                                                                    id="check-<%=teacher.getCodigoDocente()%>"
-                                                                    onchange="validarCheck(<%=teacher.getCodigoDocente()%>)"
+                                                                    id="check-<%=teacher.getCodigo()%>"
+                                                                    onchange="validarCheck(<%=teacher.getCodigo()%>)"
                                                                     checked>
-                                                                <label for="<%=teacher.getCodigoDocente()%>"
+                                                                <label for="<%=teacher.getCodigo()%>"
                                                                     class="switch-button__label"
-                                                                    onclick="validarCheck(<%=teacher.getCodigoDocente()%>)"></label>
+                                                                    onclick="validarCheck(<%=teacher.getCodigo()%>)"></label>
                                                             </button>
                                                             <%} else {%>
                                                             <button class="btn btn-primary btn-link">
                                                                 <input class="switch-button__checkbox" type="checkbox"
-                                                                    id="check-<%=teacher.getCodigoDocente()%>"
-                                                                    onchange="validarCheck(<%=teacher.getCodigoDocente()%>)">
-                                                                <label for="<%=teacher.getCodigoDocente()%>"
+                                                                    id="check-<%=teacher.getCodigo()%>"
+                                                                    onchange="validarCheck(<%=teacher.getCodigo()%>)">
+                                                                <label for="<%=teacher.getCodigo()%>"
                                                                     class="switch-button__label"
-                                                                    onclick="validarCheck(<%=teacher.getCodigoDocente()%>)"></label>
+                                                                    onclick="validarCheck(<%=teacher.getCodigo()%>)"></label>
                                                             </button>
                                                             <%}%>
-                                                                        </div>
-                                                                    </td>
-                                                                    </tr>
-                                                                    <%}
-                                                                        }%>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <%}}%>
                                             </tbody>
                                         </table>
                                     </div>
@@ -176,23 +174,20 @@
     <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/core/popper.min.js"></script>
     <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/core/bootstrap.min.js"></script>
     <!-- jQuery UI -->
-    <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js">
-    </script>
-    <script
-        src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js">
-    </script>
+    <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
     <!-- jQuery Scrollbar -->
-    <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js">
-    </script>
+    <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
     <!-- Datatables -->
     <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/datatables/datatables.min.js"></script>
     <!-- Atlantis JS -->
     <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/atlantis.min.js"></script>
-    <!-- Atlantis DEMO methods, don't include it in your project! -->
-    <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/setting-demo2.js"></script>
     <!-- Filtros Tablas JS -->
     <script>
         $(document).ready(function () {
+            document.getElementById('microcurriculo').classList.toggle('active');
+            document.getElementById('microcurriculo').classList.toggle('submenu');
+            document.getElementById('sidebarLayouts').classList.toggle('show');
             document.getElementById('docentes').classList.toggle('active');
             pageLength();
         });
@@ -200,7 +195,8 @@
         function pageLength() {
             // Basic
             $('#basic-datatables').DataTable({
-                "pageLength": 15});
+                "pageLength": 15
+            });
         }
     </script>
     <script>

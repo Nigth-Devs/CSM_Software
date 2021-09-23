@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class RolJpaController implements Serializable {
 
@@ -36,26 +36,26 @@ public class RolJpaController implements Serializable {
 
     public void create(Rol rol) {
         if (rol.getUsuarioList() == null) {
-            rol.setUsuarioList(new ArrayList<>());
+            rol.setUsuarioList(new ArrayList<Usuario>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Usuario> attachedUsuarioList = new ArrayList<>();
+            List<Usuario> attachedUsuarioList = new ArrayList<Usuario>();
             for (Usuario usuarioListUsuarioToAttach : rol.getUsuarioList()) {
-                usuarioListUsuarioToAttach = em.getReference(usuarioListUsuarioToAttach.getClass(), usuarioListUsuarioToAttach.getUsuarioPK());
+                usuarioListUsuarioToAttach = em.getReference(usuarioListUsuarioToAttach.getClass(), usuarioListUsuarioToAttach.getDocenteCodigo());
                 attachedUsuarioList.add(usuarioListUsuarioToAttach);
             }
             rol.setUsuarioList(attachedUsuarioList);
             em.persist(rol);
             for (Usuario usuarioListUsuario : rol.getUsuarioList()) {
-                Rol oldRolOfUsuarioListUsuario = usuarioListUsuario.getRol();
-                usuarioListUsuario.setRol(rol);
+                Rol oldRolIdOfUsuarioListUsuario = usuarioListUsuario.getRolId();
+                usuarioListUsuario.setRolId(rol);
                 usuarioListUsuario = em.merge(usuarioListUsuario);
-                if (oldRolOfUsuarioListUsuario != null) {
-                    oldRolOfUsuarioListUsuario.getUsuarioList().remove(usuarioListUsuario);
-                    oldRolOfUsuarioListUsuario = em.merge(oldRolOfUsuarioListUsuario);
+                if (oldRolIdOfUsuarioListUsuario != null) {
+                    oldRolIdOfUsuarioListUsuario.getUsuarioList().remove(usuarioListUsuario);
+                    oldRolIdOfUsuarioListUsuario = em.merge(oldRolIdOfUsuarioListUsuario);
                 }
             }
             em.getTransaction().commit();
@@ -78,17 +78,17 @@ public class RolJpaController implements Serializable {
             for (Usuario usuarioListOldUsuario : usuarioListOld) {
                 if (!usuarioListNew.contains(usuarioListOldUsuario)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain Usuario " + usuarioListOldUsuario + " since its rol field is not nullable.");
+                    illegalOrphanMessages.add("You must retain Usuario " + usuarioListOldUsuario + " since its rolId field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Usuario> attachedUsuarioListNew = new ArrayList<>();
+            List<Usuario> attachedUsuarioListNew = new ArrayList<Usuario>();
             for (Usuario usuarioListNewUsuarioToAttach : usuarioListNew) {
-                usuarioListNewUsuarioToAttach = em.getReference(usuarioListNewUsuarioToAttach.getClass(), usuarioListNewUsuarioToAttach.getUsuarioPK());
+                usuarioListNewUsuarioToAttach = em.getReference(usuarioListNewUsuarioToAttach.getClass(), usuarioListNewUsuarioToAttach.getDocenteCodigo());
                 attachedUsuarioListNew.add(usuarioListNewUsuarioToAttach);
             }
             usuarioListNew = attachedUsuarioListNew;
@@ -96,12 +96,12 @@ public class RolJpaController implements Serializable {
             rol = em.merge(rol);
             for (Usuario usuarioListNewUsuario : usuarioListNew) {
                 if (!usuarioListOld.contains(usuarioListNewUsuario)) {
-                    Rol oldRolOfUsuarioListNewUsuario = usuarioListNewUsuario.getRol();
-                    usuarioListNewUsuario.setRol(rol);
+                    Rol oldRolIdOfUsuarioListNewUsuario = usuarioListNewUsuario.getRolId();
+                    usuarioListNewUsuario.setRolId(rol);
                     usuarioListNewUsuario = em.merge(usuarioListNewUsuario);
-                    if (oldRolOfUsuarioListNewUsuario != null && !oldRolOfUsuarioListNewUsuario.equals(rol)) {
-                        oldRolOfUsuarioListNewUsuario.getUsuarioList().remove(usuarioListNewUsuario);
-                        oldRolOfUsuarioListNewUsuario = em.merge(oldRolOfUsuarioListNewUsuario);
+                    if (oldRolIdOfUsuarioListNewUsuario != null && !oldRolIdOfUsuarioListNewUsuario.equals(rol)) {
+                        oldRolIdOfUsuarioListNewUsuario.getUsuarioList().remove(usuarioListNewUsuario);
+                        oldRolIdOfUsuarioListNewUsuario = em.merge(oldRolIdOfUsuarioListNewUsuario);
                     }
                 }
             }
@@ -138,9 +138,9 @@ public class RolJpaController implements Serializable {
             List<Usuario> usuarioListOrphanCheck = rol.getUsuarioList();
             for (Usuario usuarioListOrphanCheckUsuario : usuarioListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This Rol (" + rol + ") cannot be destroyed since the Usuario " + usuarioListOrphanCheckUsuario + " in its usuarioList field has a non-nullable rol field.");
+                illegalOrphanMessages.add("This Rol (" + rol + ") cannot be destroyed since the Usuario " + usuarioListOrphanCheckUsuario + " in its usuarioList field has a non-nullable rolId field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
@@ -199,5 +199,5 @@ public class RolJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

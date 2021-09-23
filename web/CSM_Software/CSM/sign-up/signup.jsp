@@ -6,27 +6,27 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <title>CSM Software</title>
         <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-        <link rel="icon" href="../../assets/img/icon.ico" type="image/x-icon" />
+        <link rel="icon" href="<%=request.getContextPath()%>/CSM_Software/assets/img/icon.ico" type="image/x-icon" />
         <!-- Custom CSS -->
-        <link rel="stylesheet" href="../../assets/css/singup.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/CSM_Software/assets/css/singup.css">
 
         <!-- CSS Files -->
-        <link rel="stylesheet" href="../../assets/css/bootstrap.min.css">
-        <link rel="stylesheet" href="../../assets/css/checkradio.css">
-        <link rel="stylesheet" href="../../assets/css/microcurriculo.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/CSM_Software/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/CSM_Software/assets/css/checkradio.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/CSM_Software/assets/css/microcurriculo.css">
         <!-- CSS Just for demo purpose, don't include it in your project -->
-        <link rel="stylesheet" href="../../assets/css/demo.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/CSM_Software/assets/css/demo.css">
         <!-- CSS Custom -->
-        <link rel="stylesheet" href="../../assets/css/microcurriculo.css">
-        <script src="../../assets/js/JQuery.js" type="text/javascript"></script>
-        <script src="../../assets/js/index.js" type="text/javascript"></script>
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/CSM_Software/assets/css/microcurriculo.css">
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/JQuery.js" type="text/javascript"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/index.js" type="text/javascript"></script>
     </head>
 
     <body>
@@ -37,15 +37,15 @@
                 </div>
                 <div class="row w-100 ">
                     <div class="offset-md-10 col-2">
-                        <img class="logoUFPS" src="../../assets/img/Logo-nuevo-vertical.png" alt="logo de la UFPS">
+                        <img class="logoUFPS" src="<%=request.getContextPath()%>/CSM_Software/assets/img/Logo-nuevo-vertical.png" alt="logo de la UFPS">
                     </div>
                 </div>
             </div>
             <div class=" row d-flex justify-content-center">
-                <form class="w-75" action="../../../ControladorDocente" method="POST" accept-charset="ISO-8859-1">
+                <form class="w-75" action="<%=request.getContextPath()%>/ControladorDocente" method="POST" accept-charset="ISO-8859-1">
                     <div class=" fbr plogin  gbcolor">
                         <div class="mb-3 w-100 d-flex justify-content-center align-items-center">
-                            <img class="account" src="../../assets/img/profile.svg" alt="">
+                            <img class="account" src="<%=request.getContextPath()%>/CSM_Software/assets/img/profile.svg" alt="">
                         </div>
                         <div class="mb-3 row w-100">
                             <h3 class="col-2">Nombres</h3>
@@ -74,11 +74,11 @@
                         <!--botones-->
                         <div class="w-100 d-flex justify-content-center ">
                             <div class="w-25">
-                                <a class="btn btn-danger mb-2 w-100 brlogin mr-2" href="../sign-in/singin.jsp">Iniciar
+                                <a class="btn btn-danger mb-2 w-100 brlogin mr-2" href="<%=request.getContextPath()%>/CSM_Software/CSM/sign-in/singin.jsp">Iniciar
                                     Sesion</a>
                             </div>
                             <div class="w-25">
-                                <input class="btn btn-danger mb-2 w-100 brlogin ml-2" type="submit" name="action" value="Registrar">
+                                <input class="btn btn-danger mb-2 w-100 brlogin ml-2" type="submit" value="Registrar">
                             </div>
                         </div>
                         <!--botones-->
@@ -87,18 +87,16 @@
             </div>
         </div>
         <!--   Core JS Files   -->
-        <script src="../../assets/js/core/jquery.3.2.1.min.js"></script>
-        <script src="../../assets/js/core/popper.min.js"></script>
-        <script src="../../assets/js/core/bootstrap.min.js"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/core/jquery.3.2.1.min.js"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/core/popper.min.js"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/core/bootstrap.min.js"></script>
         <!-- jQuery UI -->
-        <script src="../../assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-        <script src="../../assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
         <!-- jQuery Scrollbar -->
-        <script src="../../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
         <!-- Atlantis JS -->
-        <script src="../../assets/js/atlantis.min.js"></script>
-        <!-- Atlantis DEMO methods, don't include it in your project! -->
-        <script src="../../assets/js/setting-demo2.js"></script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/atlantis.min.js"></script>
     </body>
 
 </html>

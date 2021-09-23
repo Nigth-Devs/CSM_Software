@@ -5,15 +5,9 @@
  */
 package control;
 
-import dao.DocenteJpaController;
-import dao.UsuarioJpaController;
 import dto.Docente;
-import dto.Usuario;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
-import javax.persistence.EntityManagerFactory;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -21,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import negocio.AdministrarDocentes;
 import negocio.Login;
-import util.Conexion;
 
 /**
  *
@@ -29,6 +22,7 @@ import util.Conexion;
  */
 @WebServlet(name = "ControladorDocente", urlPatterns = {"/ControladorDocente"})
 public class ControladorDocente extends HttpServlet {
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -40,18 +34,21 @@ public class ControladorDocente extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ControladorDocente</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ControladorDocente at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        try{
+            switch (request.getParameter("action")) {
+                case "registrar":
+                    this.guardarDocente(request, response);
+                    break;
+                case "activarDocente":
+                    this.activarDocente(request, response);
+                    break;
+                case "listarDocente":
+                    this.listarDocente(request, response);
+                    break;
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -67,15 +64,7 @@ public class ControladorDocente extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            switch (request.getParameter("action")) {
-                case "listarDocente":
-                    this.listarDocente(request, response);
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.processRequest(request, response);
     }
 
     /**
@@ -89,26 +78,18 @@ public class ControladorDocente extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            switch (request.getParameter("action")) {
-                case "Registrar":
-                    this.guardarDocente(request, response);
-                    break;
-                case "activarDocente":
-                    this.activarDocente(request, response);
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.processRequest(request, response);
     }
 
     public void activarDocente(HttpServletRequest request, HttpServletResponse response) throws IOException, Exception {
-        AdministrarDocentes docentes = new AdministrarDocentes();
+        AdministrarDocentes adminDocentes = new AdministrarDocentes();
+        
         String codDocente = request.getParameter("cod");
-        Docente d = docentes.obtenerDocente(Integer.parseInt(codDocente));
-        docentes.activarDocente(d, d.getEstado()!=1);
-        request.getSession().setAttribute("numDocActivos", docentes.getNumDocentesActivos());
+        Docente docente = adminDocentes.obtenerDocente(Integer.parseInt(codDocente));
+        
+        adminDocentes.activarDocente(docente, docente.getEstado() != 1);
+        
+        request.getSession().setAttribute("numDocActivos", adminDocentes.getNumDocentesActivos());
     }
 
     public void guardarDocente(HttpServletRequest request, HttpServletResponse response) throws IOException, Exception {
@@ -119,18 +100,21 @@ public class ControladorDocente extends HttpServlet {
         int departamento = Integer.parseInt(request.getParameter("optionDepartamento"));
         short estado = 1;
         String password = request.getParameter("txtPassword");
+        
         //Creacion del docente
-        AdministrarDocentes docentes = new AdministrarDocentes();
-        docentes.guardarDocente(nombre, apellido, departamento, codigo, estado);
+        AdministrarDocentes adminDocentes = new AdministrarDocentes();
+        Docente docente = adminDocentes.guardarDocente(nombre, apellido, departamento, codigo, estado);
+        
         //Creacion del usuario
         Login l = new Login();
-        l.guardarDocente(password, codigo);
+        l.guardarUsuario(docente, password);
+        
         response.sendRedirect("CSM_Software/CSM/sign-in/singin.jsp");
     }
 
     public void listarDocente(HttpServletRequest request, HttpServletResponse response) throws IOException, Exception {
-        AdministrarDocentes d = new AdministrarDocentes();
-        List<Docente> docentes = d.listarDocentes();
+        AdministrarDocentes adminDocentes = new AdministrarDocentes();
+        List<Docente> docentes = adminDocentes.listarDocentes();
         request.getSession().setAttribute("listaDocentes", docentes);
         response.sendRedirect("CSM_Software/CSM/director/dashboard/docentes.jsp");
     }

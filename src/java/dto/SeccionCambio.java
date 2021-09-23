@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "seccion_cambio")
@@ -110,5 +110,5 @@ public class SeccionCambio implements Serializable {
     public String toString() {
         return "dto.SeccionCambio[ id=" + id + " ]";
     }
-
+    
 }

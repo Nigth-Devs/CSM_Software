@@ -11,6 +11,7 @@ import dao.ProgramaJpaController;
 import dto.Materia;
 import dto.Pensum;
 import dto.PensumPK;
+import dto.Programa;
 import dto.Usuario;
 import java.io.File;
 import java.io.IOException;
@@ -38,59 +39,61 @@ public class AdministrarPensum {
     public AdministrarPensum() {
     }
 
-    public Pensum registrar(Integer id_programa, InputStream pensumFile) throws IOException, Exception {
-        LectorPensum l = new LectorPensum();
-        String path = cargarPensum(pensumFile, id_programa);
-        l.parsePDFDocument(path);
-        int count = 1;
+    public Pensum registrar(Programa programa, InputStream pensumFile) throws IOException, Exception {
         EntityManagerFactory em = Conexion.getConexion().getBd();
-        ProgramaJpaController prjpa = new ProgramaJpaController(em);
         PensumJpaController pjpa = new PensumJpaController(em);
-        List<Pensum> lp = pjpa.findPensumEntities();
-        for (Pensum p : lp) {
-            if (p.getPensumPK().getProgramaCodigo() == id_programa) {
-                count++;
-            }
-        }
-
-        Pensum p = new Pensum(new PensumPK(count, id_programa));
-        p.setPrograma(prjpa.findPrograma(id_programa));
-        pjpa.create(p);
-        List<Materia> materias = l.getMaterias(count);
-        new File(path).delete();
-        p.setMateriaList(materias);
-        new MateriaJpaAlternativo(MyConnection.getConnection()).create(p);
-        return p;
+        
+        List<Pensum> pensums = programa.getPensumList();
+        
+        LectorPensum l = new LectorPensum();
+        String path = cargarPensum(pensumFile, programa);
+        l.parsePDFDocument(path);
+        
+        Pensum pensum = new Pensum(new PensumPK(pensums.size()+1, programa.getCodigo()));
+        pensum.setPrograma(programa);
+        pjpa.create(pensum);
+        
+        List<Materia> materias = l.getMaterias(pensum.getPensumPK().getCodigo());
+        pensum.setMateriaList(materias);
+        new MateriaJpaAlternativo(MyConnection.getConnection()).create(pensum);
+        
+        new File(path).deleteOnExit();
+        
+        return pensum;
     }
 
-    private String cargarPensum(InputStream pensumeFile, Integer id_programa) throws IOException {
+    private String cargarPensum(InputStream pensumeFile, Programa programa) throws IOException {
         File folder = new File(this.realPathServer);
         folder = new File(folder.getParentFile().getParentFile().getAbsolutePath() + "/temp");
         InputStream fileContent = pensumeFile;
-        File file = File.createTempFile("pensum-" + id_programa, ".pdf", folder);
+        File file = File.createTempFile("pensum-" + programa.getCodigo(), ".pdf", folder);
         Files.copy(fileContent, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
         return file.getAbsolutePath();
     }
 
-    public dto.Pensum obtenerPensum(int codigo, int programaCodigo) {
+    public Pensum obtenerPensum(int codigo, int programaCodigo) {
         Conexion con = Conexion.getConexion();
-        dao.PensumJpaController daoPensum = new dao.PensumJpaController(con.getBd());
-        Pensum pensum = daoPensum.findPensum(new dto.PensumPK(codigo, programaCodigo));
+        PensumJpaController daoPensum = new PensumJpaController(con.getBd());
+        Pensum pensum = daoPensum.findPensum(new PensumPK(codigo, programaCodigo));
         return pensum;
     }
 
-    public List<dto.Pensum> obtenerPensum(dto.Programa programa) {
-        return programa.getPensumList();
+    public Object[][] getMetaInfoPensums(List<Pensum> pensums){
+        Object[][] data = new Object[pensums.size()][4];
+        int i=0;
+        for(Pensum pensum: pensums){
+            int creditosMaterias[] = this.creditosMateriasPensum(pensum);
+            data[i][0] = pensum.getPensumPK().getProgramaCodigo()+" - "+pensum.getPensumPK().getCodigo();
+            data[i][1] = creditosMaterias[1];
+            data[i][2] = creditosMaterias[0];
+            data[i++][3] = pensum.getPensumPK().getCodigo();
+        }
+        
+        return data;
     }
-
-    public List<dto.Materia> obtenerMateriasPensum(int pensumCodigo, int programaCodigo) {
-        dto.Pensum pensum = obtenerPensum(pensumCodigo, programaCodigo);
+    
+    public int[] creditosMateriasPensum(Pensum pensum) {
         List<dto.Materia> materias = pensum.getMateriaList();
-        return materias;
-    }
-
-    public int[] creditosMateriasPensum(int pensumCodigo, int programaCodigo) {
-        List<dto.Materia> materias = obtenerMateriasPensum(pensumCodigo, programaCodigo);
         int materiasXcreditos[] = new int[2];
         int creditos = 0;
         int cantMaterias = 0;
@@ -105,8 +108,10 @@ public class AdministrarPensum {
     }
 
     public Pensum getLastPensum(Usuario usuario) {
+        AdministrarPrograma adminPrograma = new AdministrarPrograma();
         Pensum pensumRes = null;
-        for (Pensum pensum : usuario.getDocente().getProgramaList().get(0).getPensumList()) {
+        Programa programa = adminPrograma.refreshPrograma(usuario.getDocente().getProgramaCodigo());
+        for (Pensum pensum : programa.getPensumList()) {
             if (pensumRes != null && pensumRes.getPensumPK().getCodigo() < pensum.getPensumPK().getCodigo()) {
                 pensumRes = pensum;
             } else {

@@ -9,27 +9,20 @@
 
 $(document).ready(function () {
     searchPensums()
-    searchMateria();
 });
 
 
 function searchPensums() {
     $.post('../../../../ControladorPensum?accion=obtenerPensums', {}, function (response) {
         $('#optionPensum').html(response);
-        $.post('../../../../ControladorPensum?accion=listarMaterias', {
-            pensumCodigo: $("#optionPensum").val()
-        }, function (response) {
-            $('#optionMateria').html(response);
-        });
+        searchMateria();
     });
 }
 
 function searchMateria() {
-    console.log("Estoy en searchMateria");
-    var p = $("#optionPensum").val();
-    console.log(p);
+    var pensumCod = $("#optionPensum").val();
     $.post('../../../../ControladorPensum?accion=listarMaterias', {
-        pensumCodigo: p
+        pensumCodigo: pensumCod
     }, function (response) {
         $('#optionMateria').html(response);
     });

@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "prerrequisito_materia")
@@ -39,13 +39,13 @@ public class PrerrequisitoMateria implements Serializable {
     @Column(name = "id")
     private Integer id;
     @JoinColumns({
-        @JoinColumn(name = "materia_codigo_materia", referencedColumnName = "codigo_materia")
+        @JoinColumn(name = "materia_codigo", referencedColumnName = "codigo")
         , @JoinColumn(name = "materia_pensum_codigo", referencedColumnName = "pensum_codigo")})
     @ManyToOne(optional = false)
     private Materia materia;
     @JoinColumns({
-        @JoinColumn(name = "materia_codigo_prerrequisito", referencedColumnName = "codigo_materia")
-        , @JoinColumn(name = "materia_pensum_prerrequisito", referencedColumnName = "pensum_codigo")})
+        @JoinColumn(name = "materia_codigo_prerreq", referencedColumnName = "codigo")
+        , @JoinColumn(name = "materia_pensum_codigo_prerreq", referencedColumnName = "pensum_codigo")})
     @ManyToOne(optional = false)
     private Materia materia1;
 
@@ -104,5 +104,5 @@ public class PrerrequisitoMateria implements Serializable {
     public String toString() {
         return "dto.PrerrequisitoMateria[ id=" + id + " ]";
     }
-
+    
 }

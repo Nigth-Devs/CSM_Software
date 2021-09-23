@@ -24,7 +24,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class PensumJpaController implements Serializable {
 
@@ -42,7 +42,7 @@ public class PensumJpaController implements Serializable {
             pensum.setPensumPK(new PensumPK());
         }
         if (pensum.getMateriaList() == null) {
-            pensum.setMateriaList(new ArrayList<>());
+            pensum.setMateriaList(new ArrayList<Materia>());
         }
         pensum.getPensumPK().setProgramaCodigo(pensum.getPrograma().getCodigo());
         EntityManager em = null;
@@ -54,7 +54,7 @@ public class PensumJpaController implements Serializable {
                 programa = em.getReference(programa.getClass(), programa.getCodigo());
                 pensum.setPrograma(programa);
             }
-            List<Materia> attachedMateriaList = new ArrayList<>();
+            List<Materia> attachedMateriaList = new ArrayList<Materia>();
             for (Materia materiaListMateriaToAttach : pensum.getMateriaList()) {
                 materiaListMateriaToAttach = em.getReference(materiaListMateriaToAttach.getClass(), materiaListMateriaToAttach.getMateriaPK());
                 attachedMateriaList.add(materiaListMateriaToAttach);
@@ -102,7 +102,7 @@ public class PensumJpaController implements Serializable {
             for (Materia materiaListOldMateria : materiaListOld) {
                 if (!materiaListNew.contains(materiaListOldMateria)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain Materia " + materiaListOldMateria + " since its pensum field is not nullable.");
                 }
@@ -114,7 +114,7 @@ public class PensumJpaController implements Serializable {
                 programaNew = em.getReference(programaNew.getClass(), programaNew.getCodigo());
                 pensum.setPrograma(programaNew);
             }
-            List<Materia> attachedMateriaListNew = new ArrayList<>();
+            List<Materia> attachedMateriaListNew = new ArrayList<Materia>();
             for (Materia materiaListNewMateriaToAttach : materiaListNew) {
                 materiaListNewMateriaToAttach = em.getReference(materiaListNewMateriaToAttach.getClass(), materiaListNewMateriaToAttach.getMateriaPK());
                 attachedMateriaListNew.add(materiaListNewMateriaToAttach);
@@ -174,7 +174,7 @@ public class PensumJpaController implements Serializable {
             List<Materia> materiaListOrphanCheck = pensum.getMateriaList();
             for (Materia materiaListOrphanCheckMateria : materiaListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Pensum (" + pensum + ") cannot be destroyed since the Materia " + materiaListOrphanCheckMateria + " in its materiaList field has a non-nullable pensum field.");
             }

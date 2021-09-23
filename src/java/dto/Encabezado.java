@@ -6,78 +6,85 @@
 package dto;
 
 import java.io.Serializable;
-import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "encabezado")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Encabezado.findAll", query = "SELECT e FROM Encabezado e")
-    , @NamedQuery(name = "Encabezado.findById", query = "SELECT e FROM Encabezado e WHERE e.id = :id")
-    , @NamedQuery(name = "Encabezado.findByNombre", query = "SELECT e FROM Encabezado e WHERE e.nombre = :nombre")})
+    , @NamedQuery(name = "Encabezado.findByColumna", query = "SELECT e FROM Encabezado e WHERE e.encabezadoPK.columna = :columna")
+    , @NamedQuery(name = "Encabezado.findByTablaId", query = "SELECT e FROM Encabezado e WHERE e.encabezadoPK.tablaId = :tablaId")
+    , @NamedQuery(name = "Encabezado.findByEncabezado", query = "SELECT e FROM Encabezado e WHERE e.encabezado = :encabezado")})
 public class Encabezado implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Id
+    @EmbeddedId
+    protected EncabezadoPK encabezadoPK;
     @Basic(optional = false)
-    @Column(name = "id")
-    private Integer id;
-    @Column(name = "nombre")
-    private String nombre;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "encabezadoId")
-    private List<EncabezadoTabla> encabezadoTablaList;
+    @Column(name = "encabezado")
+    private String encabezado;
+    @JoinColumn(name = "tabla_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Tabla tabla;
 
     public Encabezado() {
     }
 
-    public Encabezado(Integer id) {
-        this.id = id;
+    public Encabezado(EncabezadoPK encabezadoPK) {
+        this.encabezadoPK = encabezadoPK;
     }
 
-    public Integer getId() {
-        return id;
+    public Encabezado(EncabezadoPK encabezadoPK, String encabezado) {
+        this.encabezadoPK = encabezadoPK;
+        this.encabezado = encabezado;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public Encabezado(int columna, int tablaId) {
+        this.encabezadoPK = new EncabezadoPK(columna, tablaId);
     }
 
-    public String getNombre() {
-        return nombre;
+    public EncabezadoPK getEncabezadoPK() {
+        return encabezadoPK;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setEncabezadoPK(EncabezadoPK encabezadoPK) {
+        this.encabezadoPK = encabezadoPK;
     }
 
-    @XmlTransient
-    public List<EncabezadoTabla> getEncabezadoTablaList() {
-        return encabezadoTablaList;
+    public String getEncabezado() {
+        return encabezado;
     }
 
-    public void setEncabezadoTablaList(List<EncabezadoTabla> encabezadoTablaList) {
-        this.encabezadoTablaList = encabezadoTablaList;
+    public void setEncabezado(String encabezado) {
+        this.encabezado = encabezado;
+    }
+
+    public Tabla getTabla() {
+        return tabla;
+    }
+
+    public void setTabla(Tabla tabla) {
+        this.tabla = tabla;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (encabezadoPK != null ? encabezadoPK.hashCode() : 0);
         return hash;
     }
 
@@ -88,7 +95,7 @@ public class Encabezado implements Serializable {
             return false;
         }
         Encabezado other = (Encabezado) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.encabezadoPK == null && other.encabezadoPK != null) || (this.encabezadoPK != null && !this.encabezadoPK.equals(other.encabezadoPK))) {
             return false;
         }
         return true;
@@ -96,7 +103,7 @@ public class Encabezado implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.Encabezado[ id=" + id + " ]";
+        return "dto.Encabezado[ encabezadoPK=" + encabezadoPK + " ]";
     }
-
+    
 }

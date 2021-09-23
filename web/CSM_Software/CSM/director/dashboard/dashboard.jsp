@@ -4,11 +4,12 @@
     Author     : Stiward
 --%>
 
+<%@page import="java.util.List"%>
 <%@page import="dto.Pensum"%>
 <%@page import="dto.Usuario"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -46,9 +47,7 @@
 
     <body>
         <%
-            Usuario user = (Usuario) request.getSession().getAttribute("usuario");
             Pensum pensum = (Pensum) request.getSession().getAttribute("pensum");
-            request.getSession().removeAttribute("materias");
         %>
         <div class="wrapper">
             <div class="main-header">
@@ -93,8 +92,7 @@
                             <div class="col-sm-6 col-md-3">
                                 <div class="card card-stats card-primary card-round">
                                     <div class="card-body">
-                                        <a href="<%=request.getContextPath()%>/ControladorDocente?action=listarDocente"
-                                           alt="Docentes" class="anonstyle">
+                                        <a href="<%=request.getContextPath()%>/ControladorDocente?action=listarDocente" alt="Docentes" class="anonstyle">
                                             <div class="row">
                                                 <div class="col-5">
                                                     <div class="icon-big text-center">
@@ -115,8 +113,7 @@
                             <div class="col-sm-6 col-md-3">
                                 <div class="card card-stats card-info card-round">
                                     <div class="card-body">
-                                        <a href="<%=request.getContextPath()%>/ControladorPensum?accion=listarPensum"
-                                           alt="Pensum" class="anonstyle">
+                                        <a href="<%=request.getContextPath()%>/ControladorPensum?accion=listarPensum" alt="Pensum" class="anonstyle">
                                             <div class="row">
                                                 <div class="col-5">
                                                     <div class="icon-big text-center">
@@ -141,8 +138,7 @@
                             <div class="col-sm-6 col-md-3">
                                 <div class="card card-stats card-warning card-round">
                                     <div class="card-body ">
-                                        <a href="<%=request.getContextPath()%>/CSM_Software/CSM/director/dashboard/seguimiento.jsp"
-                                           alt="Materias" class="anonstyle">
+                                        <a href="<%=request.getContextPath()%>/CSM_Software/CSM/director/dashboard/seguimiento.jsp" alt="Materias" class="anonstyle">
                                             <div class="row">
                                                 <div class="col-5">
                                                     <div class="icon-big text-center">
@@ -167,8 +163,7 @@
                             <div class="col-sm-6 col-md-3">
                                 <div class="card card-stats card-danger card-round">
                                     <div class="card-body ">
-                                        <a href="<%=request.getContextPath()%>/ControladorMicrocurriculo?accion=listarTodos"
-                                           alt="Microcurriculos" class="anonstyle">
+                                        <a href="<%=request.getContextPath()%>/ControladorMicrocurriculo?accion=listarTodos" alt="Microcurriculos" class="anonstyle">
                                             <div class="row">
                                                 <div class="col-5">
                                                     <div class="icon-big text-center">
@@ -187,7 +182,6 @@
                                                 </div>
                                             </div>
                                         </a>
-
                                     </div>
                                 </div>
                             </div>
@@ -197,15 +191,115 @@
                             <div class="col-md-12">
                                 <div class="card">
                                     <div class="card-header text-center">
-                                        <div class="card-title">Porcentaje de Cumplimiento</div>
+                                        <div class="card-title">Porcentaje de Cumplimiento / 115 - 02 / 2021 - 2</div>
                                     </div>
                                     <div class="card-body">
-                                        <div class="d-flex justify-content-center align-items-center"
-                                             id="columnchart_values"></div>
+                                        <div class="d-flex justify-content-center align-items-center" id="columnchart_values"></div>
                                     </div>
                                 </div>
                             </div>
                             <!-- Fin Tabla % Seguimiento -->
+
+
+                            <!-- Tabla Cumplimiento de Periodos Acádemicos -->
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header text-center">
+                                        <h4 class="card-title">Cumplimiento de Periodos Acádemicos</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="basic-datatables" class="display table table-striped table-hover text-center">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Pensum</th>
+                                                        <th>Periodo</th>
+                                                        <th>Cumplimiento (%)</th>
+                                                        <th>Estado</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th>Pensum</th>
+                                                        <th>Periodo</th>
+                                                        <th>Cumplimiento (%)</th>
+                                                        <th>Estado</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </tfoot>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>115 - 1</td>
+                                                        <td>2021 - 2</td>
+                                                        <td>80</td>
+                                                        <td>En Curso</td>
+                                                        <td>
+                                                            <div class="form-button-action">
+                                                                <a href="#"
+                                                                   type="button" data-toggle="tooltip" title=""
+                                                                   class="btn btn-link btn-dark" data-original-title="Ver"
+                                                                   style="color: black;">
+                                                                    <i class="fas fa-search"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>115 - 1</td>
+                                                        <td>2021 - 1</td>
+                                                        <td>85</td>
+                                                        <td>Finalizado</td>
+                                                        <td>
+                                                            <div class="form-button-action">
+                                                                <a href="#"
+                                                                   type="button" data-toggle="tooltip" title=""
+                                                                   class="btn btn-link btn-dark" data-original-title="Ver"
+                                                                   style="color: black;">
+                                                                    <i class="fas fa-search"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>115 - 1</td>
+                                                        <td>2020 - 2</td>
+                                                        <td>90</td>
+                                                        <td>Finalizado</td>
+                                                        <td>
+                                                            <div class="form-button-action">
+                                                                <a href="#"
+                                                                   type="button" data-toggle="tooltip" title=""
+                                                                   class="btn btn-link btn-dark" data-original-title="Ver"
+                                                                   style="color: black;">
+                                                                    <i class="fas fa-search"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr> 
+                                                    <tr>
+                                                        <td>115 - 1</td>
+                                                        <td>2020 - 1</td>
+                                                        <td>80</td>
+                                                        <td>Finalizado</td>
+                                                        <td>
+                                                            <div class="form-button-action">
+                                                                <a href="#"
+                                                                   type="button" data-toggle="tooltip" title=""
+                                                                   class="btn btn-link btn-dark" data-original-title="Ver"
+                                                                   style="color: black;">
+                                                                    <i class="fas fa-search"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fin Tabla Cumplimiento de Periodos Acádemicos -->
                         </div>
                     </div>
                 </div>
@@ -256,15 +350,11 @@
         <!-- Atlantis JS -->
         <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/atlantis.min.js"></script>
 
-        <!-- Atlantis DEMO methods, don't include it in your project! -->
-        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/setting-demo.js"></script>
-        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/demo.js"></script>
-
         <!-- Chart -->
         <script type="text/javascript">
-            $(document).ready(function (){
+            $(document).ready(function () {
                 google.charts.load("current", {
-                packages: ['corechart']
+                    packages: ['corechart']
                 });
                 google.charts.setOnLoadCallback(drawChart);
             });
@@ -275,51 +365,11 @@
                     ["Materia", "Porcentaje", {
                             role: "style"
                         }],
-                    ["Calculo Diferencial", 50, "#a81f2b"],
-                    ["Matematicas Discretas", 10, "#a81f2b"],
-                    ["Fundamentos de Programacion", 25, "#a81f2b"],
-                    ["Introduccion Ing. Sistemas", 30, "#a81f2b"],
-                    ["Comunicacion I", 50, "#a81f2b"],
-                    ["Intro Vida Universitaria", 25, "#a81f2b"],
-                    ["Calculo Integral", 89, "#a81f2b"],
-                    ["Algebra Lineal", 100, "#a81f2b"],
-                    ["Fisica Mecanica", 19, "#a81f2b"],
-                    ["Programacion Orientada a Objectos", 30, "#a81f2b"],
-                    ["Comunicacion II", 75, "#a81f2b"],
-                    ["Seminario Integrador I", 50, "#a81f2b"],
-                    ["Calculo Vectorial", 50, "#a81f2b"],
-                    ["Fisica Electromagnetica", 27, "#a81f2b"],
-                    ["Estructuras de Datos", 50, "#a81f2b"],
-                    ["Programacion Orientada a Objectos II", 10, "#a81f2b"],
-                    ["Seminario de Investigacion I", 25, "#a81f2b"],
-                    ["Ecuaciones Diferenciales", 30, "#a81f2b"],
-                    ["Probabilidad y Estadistica", 50, "#a81f2b"],
-                    ["Ondas y Particulas", 25, "#a81f2b"],
-                    ["Analisis de Algoritmos", 89, "#a81f2b"],
-                    ["Teoria de la Computación", 100, "#a81f2b"],
-                    ["Analisis Numerico", 19, "#a81f2b"],
-                    ["Investigacion de Operaciones", 30, "#a81f2b"],
-                    ["Electronica", 75, "#a81f2b"],
-                    ["Arquitectura de Computadores", 50, "#a81f2b"],
-                    ["Seminario de Investigacion II", 50, "#a81f2b"],
-                    ["Sistemas Operativos", 27, "#a81f2b"],
-                    ["Bases de Datos", 50, "#a81f2b"],
-                    ["Programacion Web", 10, "#a81f2b"],
-                    ["Constitucion y Civismo", 25, "#a81f2b"],
-                    ["Planeacion Estrategica de Sistemas Informacion", 30, "#a81f2b"],
-                    ["Teoria General de las Comunicaciones", 50, "#a81f2b"],
-                    ["Analisis y Diseño de Sistemas", 25, "#a81f2b"],
-                    ["Seminario de Investigacion III", 89, "#a81f2b"],
-                    ["Etica Profesional", 100, "#a81f2b"],
-                    ["Administracion de Proyectos Informaticos", 19, "#a81f2b"],
-                    ["Programacion Orientada a Objectos", 30, "#a81f2b"],
-                    ["Redes de Computadores", 75, "#a81f2b"],
-                    ["Ingenieria de Software", 50, "#a81f2b"],
-                    ["Formulacion y Evaluacion de Proyectos de Sistemas", 50, "#a81f2b"],
-                    ["Seminario Integrador III", 27, "#a81f2b"],
-                    ["Arquitectura de Software", 37, "#a81f2b"],
-                    ["Gestion de Tics", 77, "#a81f2b"],
-                    ["Practica en Ing. Sistemas", 87, "#a81f2b"]
+                    <%
+                        List<Object[]> listSeg = (List<Object[]>)request.getSession().getAttribute("listSeguimiento"); 
+                        for(Object row[]: listSeg){%>
+                            ["<%=row[1] %>", <%=(int)row[4]%>, "#a81f2b"],
+                    <%}%>
                 ]);
 
 
@@ -343,15 +393,31 @@
                     legend: {
                         position: "none"
                     },
-                };
+                    vAxis: {
+                        viewWindowMode:'explicit',
+                        viewWindow: {
+                          max:100,
+                          min:0
+                        }
+                    }};
                 var chart = new google.visualization.ColumnChart(document.getElementById("columnchart_values"));
                 chart.draw(view, options);
             }
         </script>
         <script type="text/javascript">
             $(document).ready(function () {
+                document.getElementById('microcurriculo').classList.toggle('active');
+                document.getElementById('microcurriculo').classList.toggle('submenu');
+                document.getElementById('sidebarLayouts').classList.toggle('show');
                 document.getElementById('dashboard').classList.toggle('active');
+                pageLength();
             });
+
+            function pageLength() {
+                // Basic
+                $('#basic-datatables').DataTable({
+                    "pageLength": 5});
+            }
         </script>
     </body>
 

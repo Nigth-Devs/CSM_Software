@@ -16,21 +16,21 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "microcurriculo")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Microcurriculo.findAll", query = "SELECT m FROM Microcurriculo m")
-    , @NamedQuery(name = "Microcurriculo.findById", query = "SELECT m FROM Microcurriculo m WHERE m.microcurriculoPK.id = :id")
-    , @NamedQuery(name = "Microcurriculo.findByMateriaCodigoMateria", query = "SELECT m FROM Microcurriculo m WHERE m.microcurriculoPK.materiaCodigoMateria = :materiaCodigoMateria")
+    , @NamedQuery(name = "Microcurriculo.findByMateriaCodigo", query = "SELECT m FROM Microcurriculo m WHERE m.microcurriculoPK.materiaCodigo = :materiaCodigo")
     , @NamedQuery(name = "Microcurriculo.findByMateriaPensumCodigo", query = "SELECT m FROM Microcurriculo m WHERE m.microcurriculoPK.materiaPensumCodigo = :materiaPensumCodigo")})
 public class Microcurriculo implements Serializable {
 
@@ -40,13 +40,15 @@ public class Microcurriculo implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "microcurriculo")
     private List<SeccionMicrocurriculo> seccionMicrocurriculoList;
     @JoinColumn(name = "area_de_formacion_id", referencedColumnName = "id")
-    @ManyToOne
+    @ManyToOne(optional = false)
     private AreaFormacion areaDeFormacionId;
     @JoinColumns({
-        @JoinColumn(name = "materia_codigo_materia", referencedColumnName = "codigo_materia", insertable = false, updatable = false)
+        @JoinColumn(name = "materia_codigo", referencedColumnName = "codigo", insertable = false, updatable = false)
         , @JoinColumn(name = "materia_pensum_codigo", referencedColumnName = "pensum_codigo", insertable = false, updatable = false)})
-    @ManyToOne(optional = false)
+    @OneToOne(optional = false)
     private Materia materia;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "microcurriculo")
+    private List<Unidad> unidadList;
 
     public Microcurriculo() {
     }
@@ -55,8 +57,8 @@ public class Microcurriculo implements Serializable {
         this.microcurriculoPK = microcurriculoPK;
     }
 
-    public Microcurriculo(int id, int materiaCodigoMateria, int materiaPensumCodigo) {
-        this.microcurriculoPK = new MicrocurriculoPK(id, materiaCodigoMateria, materiaPensumCodigo);
+    public Microcurriculo(int materiaCodigo, int materiaPensumCodigo) {
+        this.microcurriculoPK = new MicrocurriculoPK(materiaCodigo, materiaPensumCodigo);
     }
 
     public MicrocurriculoPK getMicrocurriculoPK() {
@@ -92,6 +94,15 @@ public class Microcurriculo implements Serializable {
         this.materia = materia;
     }
 
+    @XmlTransient
+    public List<Unidad> getUnidadList() {
+        return unidadList;
+    }
+
+    public void setUnidadList(List<Unidad> unidadList) {
+        this.unidadList = unidadList;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -116,5 +127,5 @@ public class Microcurriculo implements Serializable {
     public String toString() {
         return "dto.Microcurriculo[ microcurriculoPK=" + microcurriculoPK + " ]";
     }
-
+    
 }

@@ -19,7 +19,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class EquivalenciaMateriaJpaController implements Serializable {
 
@@ -164,5 +164,5 @@ public class EquivalenciaMateriaJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

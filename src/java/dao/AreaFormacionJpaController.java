@@ -5,6 +5,7 @@
  */
 package dao;
 
+import dao.exceptions.IllegalOrphanException;
 import dao.exceptions.NonexistentEntityException;
 import dto.AreaFormacion;
 import java.io.Serializable;
@@ -20,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class AreaFormacionJpaController implements Serializable {
 
@@ -35,13 +36,13 @@ public class AreaFormacionJpaController implements Serializable {
 
     public void create(AreaFormacion areaFormacion) {
         if (areaFormacion.getMicrocurriculoList() == null) {
-            areaFormacion.setMicrocurriculoList(new ArrayList<>());
+            areaFormacion.setMicrocurriculoList(new ArrayList<Microcurriculo>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Microcurriculo> attachedMicrocurriculoList = new ArrayList<>();
+            List<Microcurriculo> attachedMicrocurriculoList = new ArrayList<Microcurriculo>();
             for (Microcurriculo microcurriculoListMicrocurriculoToAttach : areaFormacion.getMicrocurriculoList()) {
                 microcurriculoListMicrocurriculoToAttach = em.getReference(microcurriculoListMicrocurriculoToAttach.getClass(), microcurriculoListMicrocurriculoToAttach.getMicrocurriculoPK());
                 attachedMicrocurriculoList.add(microcurriculoListMicrocurriculoToAttach);
@@ -65,7 +66,7 @@ public class AreaFormacionJpaController implements Serializable {
         }
     }
 
-    public void edit(AreaFormacion areaFormacion) throws NonexistentEntityException, Exception {
+    public void edit(AreaFormacion areaFormacion) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -73,7 +74,19 @@ public class AreaFormacionJpaController implements Serializable {
             AreaFormacion persistentAreaFormacion = em.find(AreaFormacion.class, areaFormacion.getId());
             List<Microcurriculo> microcurriculoListOld = persistentAreaFormacion.getMicrocurriculoList();
             List<Microcurriculo> microcurriculoListNew = areaFormacion.getMicrocurriculoList();
-            List<Microcurriculo> attachedMicrocurriculoListNew = new ArrayList<>();
+            List<String> illegalOrphanMessages = null;
+            for (Microcurriculo microcurriculoListOldMicrocurriculo : microcurriculoListOld) {
+                if (!microcurriculoListNew.contains(microcurriculoListOldMicrocurriculo)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Microcurriculo " + microcurriculoListOldMicrocurriculo + " since its areaDeFormacionId field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            List<Microcurriculo> attachedMicrocurriculoListNew = new ArrayList<Microcurriculo>();
             for (Microcurriculo microcurriculoListNewMicrocurriculoToAttach : microcurriculoListNew) {
                 microcurriculoListNewMicrocurriculoToAttach = em.getReference(microcurriculoListNewMicrocurriculoToAttach.getClass(), microcurriculoListNewMicrocurriculoToAttach.getMicrocurriculoPK());
                 attachedMicrocurriculoListNew.add(microcurriculoListNewMicrocurriculoToAttach);
@@ -81,12 +94,6 @@ public class AreaFormacionJpaController implements Serializable {
             microcurriculoListNew = attachedMicrocurriculoListNew;
             areaFormacion.setMicrocurriculoList(microcurriculoListNew);
             areaFormacion = em.merge(areaFormacion);
-            for (Microcurriculo microcurriculoListOldMicrocurriculo : microcurriculoListOld) {
-                if (!microcurriculoListNew.contains(microcurriculoListOldMicrocurriculo)) {
-                    microcurriculoListOldMicrocurriculo.setAreaDeFormacionId(null);
-                    microcurriculoListOldMicrocurriculo = em.merge(microcurriculoListOldMicrocurriculo);
-                }
-            }
             for (Microcurriculo microcurriculoListNewMicrocurriculo : microcurriculoListNew) {
                 if (!microcurriculoListOld.contains(microcurriculoListNewMicrocurriculo)) {
                     AreaFormacion oldAreaDeFormacionIdOfMicrocurriculoListNewMicrocurriculo = microcurriculoListNewMicrocurriculo.getAreaDeFormacionId();
@@ -115,7 +122,7 @@ public class AreaFormacionJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -127,10 +134,16 @@ public class AreaFormacionJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The areaFormacion with id " + id + " no longer exists.", enfe);
             }
-            List<Microcurriculo> microcurriculoList = areaFormacion.getMicrocurriculoList();
-            for (Microcurriculo microcurriculoListMicrocurriculo : microcurriculoList) {
-                microcurriculoListMicrocurriculo.setAreaDeFormacionId(null);
-                microcurriculoListMicrocurriculo = em.merge(microcurriculoListMicrocurriculo);
+            List<String> illegalOrphanMessages = null;
+            List<Microcurriculo> microcurriculoListOrphanCheck = areaFormacion.getMicrocurriculoList();
+            for (Microcurriculo microcurriculoListOrphanCheckMicrocurriculo : microcurriculoListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This AreaFormacion (" + areaFormacion + ") cannot be destroyed since the Microcurriculo " + microcurriculoListOrphanCheckMicrocurriculo + " in its microcurriculoList field has a non-nullable areaDeFormacionId field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(areaFormacion);
             em.getTransaction().commit();
@@ -186,5 +199,5 @@ public class AreaFormacionJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

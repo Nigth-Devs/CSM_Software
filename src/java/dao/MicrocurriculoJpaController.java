@@ -20,12 +20,13 @@ import dto.MicrocurriculoPK;
 import dto.SeccionMicrocurriculo;
 import java.util.ArrayList;
 import java.util.List;
+import dto.Unidad;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class MicrocurriculoJpaController implements Serializable {
 
@@ -38,15 +39,32 @@ public class MicrocurriculoJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Microcurriculo microcurriculo) throws PreexistingEntityException, Exception {
+    public void create(Microcurriculo microcurriculo) throws IllegalOrphanException, PreexistingEntityException, Exception {
         if (microcurriculo.getMicrocurriculoPK() == null) {
             microcurriculo.setMicrocurriculoPK(new MicrocurriculoPK());
         }
         if (microcurriculo.getSeccionMicrocurriculoList() == null) {
-            microcurriculo.setSeccionMicrocurriculoList(new ArrayList<>());
+            microcurriculo.setSeccionMicrocurriculoList(new ArrayList<SeccionMicrocurriculo>());
         }
+        if (microcurriculo.getUnidadList() == null) {
+            microcurriculo.setUnidadList(new ArrayList<Unidad>());
+        }
+        microcurriculo.getMicrocurriculoPK().setMateriaCodigo(microcurriculo.getMateria().getMateriaPK().getCodigo());
         microcurriculo.getMicrocurriculoPK().setMateriaPensumCodigo(microcurriculo.getMateria().getMateriaPK().getPensumCodigo());
-        microcurriculo.getMicrocurriculoPK().setMateriaCodigoMateria(microcurriculo.getMateria().getMateriaPK().getCodigoMateria());
+        List<String> illegalOrphanMessages = null;
+        Materia materiaOrphanCheck = microcurriculo.getMateria();
+        if (materiaOrphanCheck != null) {
+            Microcurriculo oldMicrocurriculoOfMateria = materiaOrphanCheck.getMicrocurriculo();
+            if (oldMicrocurriculoOfMateria != null) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("The Materia " + materiaOrphanCheck + " already has an item of type Microcurriculo whose materia column cannot be null. Please make another selection for the materia field.");
+            }
+        }
+        if (illegalOrphanMessages != null) {
+            throw new IllegalOrphanException(illegalOrphanMessages);
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -61,19 +79,25 @@ public class MicrocurriculoJpaController implements Serializable {
                 materia = em.getReference(materia.getClass(), materia.getMateriaPK());
                 microcurriculo.setMateria(materia);
             }
-            List<SeccionMicrocurriculo> attachedSeccionMicrocurriculoList = new ArrayList<>();
+            List<SeccionMicrocurriculo> attachedSeccionMicrocurriculoList = new ArrayList<SeccionMicrocurriculo>();
             for (SeccionMicrocurriculo seccionMicrocurriculoListSeccionMicrocurriculoToAttach : microcurriculo.getSeccionMicrocurriculoList()) {
                 seccionMicrocurriculoListSeccionMicrocurriculoToAttach = em.getReference(seccionMicrocurriculoListSeccionMicrocurriculoToAttach.getClass(), seccionMicrocurriculoListSeccionMicrocurriculoToAttach.getId());
                 attachedSeccionMicrocurriculoList.add(seccionMicrocurriculoListSeccionMicrocurriculoToAttach);
             }
             microcurriculo.setSeccionMicrocurriculoList(attachedSeccionMicrocurriculoList);
+            List<Unidad> attachedUnidadList = new ArrayList<Unidad>();
+            for (Unidad unidadListUnidadToAttach : microcurriculo.getUnidadList()) {
+                unidadListUnidadToAttach = em.getReference(unidadListUnidadToAttach.getClass(), unidadListUnidadToAttach.getId());
+                attachedUnidadList.add(unidadListUnidadToAttach);
+            }
+            microcurriculo.setUnidadList(attachedUnidadList);
             em.persist(microcurriculo);
             if (areaDeFormacionId != null) {
                 areaDeFormacionId.getMicrocurriculoList().add(microcurriculo);
                 areaDeFormacionId = em.merge(areaDeFormacionId);
             }
             if (materia != null) {
-                materia.getMicrocurriculoList().add(microcurriculo);
+                materia.setMicrocurriculo(microcurriculo);
                 materia = em.merge(materia);
             }
             for (SeccionMicrocurriculo seccionMicrocurriculoListSeccionMicrocurriculo : microcurriculo.getSeccionMicrocurriculoList()) {
@@ -83,6 +107,15 @@ public class MicrocurriculoJpaController implements Serializable {
                 if (oldMicrocurriculoOfSeccionMicrocurriculoListSeccionMicrocurriculo != null) {
                     oldMicrocurriculoOfSeccionMicrocurriculoListSeccionMicrocurriculo.getSeccionMicrocurriculoList().remove(seccionMicrocurriculoListSeccionMicrocurriculo);
                     oldMicrocurriculoOfSeccionMicrocurriculoListSeccionMicrocurriculo = em.merge(oldMicrocurriculoOfSeccionMicrocurriculoListSeccionMicrocurriculo);
+                }
+            }
+            for (Unidad unidadListUnidad : microcurriculo.getUnidadList()) {
+                Microcurriculo oldMicrocurriculoOfUnidadListUnidad = unidadListUnidad.getMicrocurriculo();
+                unidadListUnidad.setMicrocurriculo(microcurriculo);
+                unidadListUnidad = em.merge(unidadListUnidad);
+                if (oldMicrocurriculoOfUnidadListUnidad != null) {
+                    oldMicrocurriculoOfUnidadListUnidad.getUnidadList().remove(unidadListUnidad);
+                    oldMicrocurriculoOfUnidadListUnidad = em.merge(oldMicrocurriculoOfUnidadListUnidad);
                 }
             }
             em.getTransaction().commit();
@@ -99,8 +132,8 @@ public class MicrocurriculoJpaController implements Serializable {
     }
 
     public void edit(Microcurriculo microcurriculo) throws IllegalOrphanException, NonexistentEntityException, Exception {
+        microcurriculo.getMicrocurriculoPK().setMateriaCodigo(microcurriculo.getMateria().getMateriaPK().getCodigo());
         microcurriculo.getMicrocurriculoPK().setMateriaPensumCodigo(microcurriculo.getMateria().getMateriaPK().getPensumCodigo());
-        microcurriculo.getMicrocurriculoPK().setMateriaCodigoMateria(microcurriculo.getMateria().getMateriaPK().getCodigoMateria());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -112,13 +145,32 @@ public class MicrocurriculoJpaController implements Serializable {
             Materia materiaNew = microcurriculo.getMateria();
             List<SeccionMicrocurriculo> seccionMicrocurriculoListOld = persistentMicrocurriculo.getSeccionMicrocurriculoList();
             List<SeccionMicrocurriculo> seccionMicrocurriculoListNew = microcurriculo.getSeccionMicrocurriculoList();
+            List<Unidad> unidadListOld = persistentMicrocurriculo.getUnidadList();
+            List<Unidad> unidadListNew = microcurriculo.getUnidadList();
             List<String> illegalOrphanMessages = null;
+            if (materiaNew != null && !materiaNew.equals(materiaOld)) {
+                Microcurriculo oldMicrocurriculoOfMateria = materiaNew.getMicrocurriculo();
+                if (oldMicrocurriculoOfMateria != null) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("The Materia " + materiaNew + " already has an item of type Microcurriculo whose materia column cannot be null. Please make another selection for the materia field.");
+                }
+            }
             for (SeccionMicrocurriculo seccionMicrocurriculoListOldSeccionMicrocurriculo : seccionMicrocurriculoListOld) {
                 if (!seccionMicrocurriculoListNew.contains(seccionMicrocurriculoListOldSeccionMicrocurriculo)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain SeccionMicrocurriculo " + seccionMicrocurriculoListOldSeccionMicrocurriculo + " since its microcurriculo field is not nullable.");
+                }
+            }
+            for (Unidad unidadListOldUnidad : unidadListOld) {
+                if (!unidadListNew.contains(unidadListOldUnidad)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Unidad " + unidadListOldUnidad + " since its microcurriculo field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -132,13 +184,20 @@ public class MicrocurriculoJpaController implements Serializable {
                 materiaNew = em.getReference(materiaNew.getClass(), materiaNew.getMateriaPK());
                 microcurriculo.setMateria(materiaNew);
             }
-            List<SeccionMicrocurriculo> attachedSeccionMicrocurriculoListNew = new ArrayList<>();
+            List<SeccionMicrocurriculo> attachedSeccionMicrocurriculoListNew = new ArrayList<SeccionMicrocurriculo>();
             for (SeccionMicrocurriculo seccionMicrocurriculoListNewSeccionMicrocurriculoToAttach : seccionMicrocurriculoListNew) {
                 seccionMicrocurriculoListNewSeccionMicrocurriculoToAttach = em.getReference(seccionMicrocurriculoListNewSeccionMicrocurriculoToAttach.getClass(), seccionMicrocurriculoListNewSeccionMicrocurriculoToAttach.getId());
                 attachedSeccionMicrocurriculoListNew.add(seccionMicrocurriculoListNewSeccionMicrocurriculoToAttach);
             }
             seccionMicrocurriculoListNew = attachedSeccionMicrocurriculoListNew;
             microcurriculo.setSeccionMicrocurriculoList(seccionMicrocurriculoListNew);
+            List<Unidad> attachedUnidadListNew = new ArrayList<Unidad>();
+            for (Unidad unidadListNewUnidadToAttach : unidadListNew) {
+                unidadListNewUnidadToAttach = em.getReference(unidadListNewUnidadToAttach.getClass(), unidadListNewUnidadToAttach.getId());
+                attachedUnidadListNew.add(unidadListNewUnidadToAttach);
+            }
+            unidadListNew = attachedUnidadListNew;
+            microcurriculo.setUnidadList(unidadListNew);
             microcurriculo = em.merge(microcurriculo);
             if (areaDeFormacionIdOld != null && !areaDeFormacionIdOld.equals(areaDeFormacionIdNew)) {
                 areaDeFormacionIdOld.getMicrocurriculoList().remove(microcurriculo);
@@ -149,11 +208,11 @@ public class MicrocurriculoJpaController implements Serializable {
                 areaDeFormacionIdNew = em.merge(areaDeFormacionIdNew);
             }
             if (materiaOld != null && !materiaOld.equals(materiaNew)) {
-                materiaOld.getMicrocurriculoList().remove(microcurriculo);
+                materiaOld.setMicrocurriculo(null);
                 materiaOld = em.merge(materiaOld);
             }
             if (materiaNew != null && !materiaNew.equals(materiaOld)) {
-                materiaNew.getMicrocurriculoList().add(microcurriculo);
+                materiaNew.setMicrocurriculo(microcurriculo);
                 materiaNew = em.merge(materiaNew);
             }
             for (SeccionMicrocurriculo seccionMicrocurriculoListNewSeccionMicrocurriculo : seccionMicrocurriculoListNew) {
@@ -164,6 +223,17 @@ public class MicrocurriculoJpaController implements Serializable {
                     if (oldMicrocurriculoOfSeccionMicrocurriculoListNewSeccionMicrocurriculo != null && !oldMicrocurriculoOfSeccionMicrocurriculoListNewSeccionMicrocurriculo.equals(microcurriculo)) {
                         oldMicrocurriculoOfSeccionMicrocurriculoListNewSeccionMicrocurriculo.getSeccionMicrocurriculoList().remove(seccionMicrocurriculoListNewSeccionMicrocurriculo);
                         oldMicrocurriculoOfSeccionMicrocurriculoListNewSeccionMicrocurriculo = em.merge(oldMicrocurriculoOfSeccionMicrocurriculoListNewSeccionMicrocurriculo);
+                    }
+                }
+            }
+            for (Unidad unidadListNewUnidad : unidadListNew) {
+                if (!unidadListOld.contains(unidadListNewUnidad)) {
+                    Microcurriculo oldMicrocurriculoOfUnidadListNewUnidad = unidadListNewUnidad.getMicrocurriculo();
+                    unidadListNewUnidad.setMicrocurriculo(microcurriculo);
+                    unidadListNewUnidad = em.merge(unidadListNewUnidad);
+                    if (oldMicrocurriculoOfUnidadListNewUnidad != null && !oldMicrocurriculoOfUnidadListNewUnidad.equals(microcurriculo)) {
+                        oldMicrocurriculoOfUnidadListNewUnidad.getUnidadList().remove(unidadListNewUnidad);
+                        oldMicrocurriculoOfUnidadListNewUnidad = em.merge(oldMicrocurriculoOfUnidadListNewUnidad);
                     }
                 }
             }
@@ -200,9 +270,16 @@ public class MicrocurriculoJpaController implements Serializable {
             List<SeccionMicrocurriculo> seccionMicrocurriculoListOrphanCheck = microcurriculo.getSeccionMicrocurriculoList();
             for (SeccionMicrocurriculo seccionMicrocurriculoListOrphanCheckSeccionMicrocurriculo : seccionMicrocurriculoListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Microcurriculo (" + microcurriculo + ") cannot be destroyed since the SeccionMicrocurriculo " + seccionMicrocurriculoListOrphanCheckSeccionMicrocurriculo + " in its seccionMicrocurriculoList field has a non-nullable microcurriculo field.");
+            }
+            List<Unidad> unidadListOrphanCheck = microcurriculo.getUnidadList();
+            for (Unidad unidadListOrphanCheckUnidad : unidadListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Microcurriculo (" + microcurriculo + ") cannot be destroyed since the Unidad " + unidadListOrphanCheckUnidad + " in its unidadList field has a non-nullable microcurriculo field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
@@ -214,7 +291,7 @@ public class MicrocurriculoJpaController implements Serializable {
             }
             Materia materia = microcurriculo.getMateria();
             if (materia != null) {
-                materia.getMicrocurriculoList().remove(microcurriculo);
+                materia.setMicrocurriculo(null);
                 materia = em.merge(materia);
             }
             em.remove(microcurriculo);
@@ -271,5 +348,5 @@ public class MicrocurriculoJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

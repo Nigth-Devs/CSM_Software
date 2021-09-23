@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "rol")
@@ -43,7 +43,7 @@ public class Rol implements Serializable {
     @Basic(optional = false)
     @Column(name = "rol")
     private String rol;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "rol")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "rolId")
     private List<Usuario> usuarioList;
 
     public Rol() {
@@ -107,5 +107,5 @@ public class Rol implements Serializable {
     public String toString() {
         return "dto.Rol[ id=" + id + " ]";
     }
-
+    
 }

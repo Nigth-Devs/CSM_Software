@@ -13,18 +13,18 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import dto.Docente;
 import dto.Departamento;
-import dto.Pensum;
-import dto.Programa;
+import dto.Docente;
 import java.util.ArrayList;
 import java.util.List;
+import dto.Pensum;
+import dto.Programa;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class ProgramaJpaController implements Serializable {
 
@@ -38,37 +38,46 @@ public class ProgramaJpaController implements Serializable {
     }
 
     public void create(Programa programa) throws PreexistingEntityException, Exception {
+        if (programa.getDocenteList() == null) {
+            programa.setDocenteList(new ArrayList<Docente>());
+        }
         if (programa.getPensumList() == null) {
-            programa.setPensumList(new ArrayList<>());
+            programa.setPensumList(new ArrayList<Pensum>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Docente directorPrograma = programa.getDirectorPrograma();
-            if (directorPrograma != null) {
-                directorPrograma = em.getReference(directorPrograma.getClass(), directorPrograma.getCodigoDocente());
-                programa.setDirectorPrograma(directorPrograma);
-            }
             Departamento departamentoId = programa.getDepartamentoId();
             if (departamentoId != null) {
                 departamentoId = em.getReference(departamentoId.getClass(), departamentoId.getId());
                 programa.setDepartamentoId(departamentoId);
             }
-            List<Pensum> attachedPensumList = new ArrayList<>();
+            List<Docente> attachedDocenteList = new ArrayList<Docente>();
+            for (Docente docenteListDocenteToAttach : programa.getDocenteList()) {
+                docenteListDocenteToAttach = em.getReference(docenteListDocenteToAttach.getClass(), docenteListDocenteToAttach.getCodigo());
+                attachedDocenteList.add(docenteListDocenteToAttach);
+            }
+            programa.setDocenteList(attachedDocenteList);
+            List<Pensum> attachedPensumList = new ArrayList<Pensum>();
             for (Pensum pensumListPensumToAttach : programa.getPensumList()) {
                 pensumListPensumToAttach = em.getReference(pensumListPensumToAttach.getClass(), pensumListPensumToAttach.getPensumPK());
                 attachedPensumList.add(pensumListPensumToAttach);
             }
             programa.setPensumList(attachedPensumList);
             em.persist(programa);
-            if (directorPrograma != null) {
-                directorPrograma.getProgramaList().add(programa);
-                directorPrograma = em.merge(directorPrograma);
-            }
             if (departamentoId != null) {
                 departamentoId.getProgramaList().add(programa);
                 departamentoId = em.merge(departamentoId);
+            }
+            for (Docente docenteListDocente : programa.getDocenteList()) {
+                Programa oldProgramaCodigoOfDocenteListDocente = docenteListDocente.getProgramaCodigo();
+                docenteListDocente.setProgramaCodigo(programa);
+                docenteListDocente = em.merge(docenteListDocente);
+                if (oldProgramaCodigoOfDocenteListDocente != null) {
+                    oldProgramaCodigoOfDocenteListDocente.getDocenteList().remove(docenteListDocente);
+                    oldProgramaCodigoOfDocenteListDocente = em.merge(oldProgramaCodigoOfDocenteListDocente);
+                }
             }
             for (Pensum pensumListPensum : programa.getPensumList()) {
                 Programa oldProgramaOfPensumListPensum = pensumListPensum.getPrograma();
@@ -98,17 +107,25 @@ public class ProgramaJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Programa persistentPrograma = em.find(Programa.class, programa.getCodigo());
-            Docente directorProgramaOld = persistentPrograma.getDirectorPrograma();
-            Docente directorProgramaNew = programa.getDirectorPrograma();
             Departamento departamentoIdOld = persistentPrograma.getDepartamentoId();
             Departamento departamentoIdNew = programa.getDepartamentoId();
+            List<Docente> docenteListOld = persistentPrograma.getDocenteList();
+            List<Docente> docenteListNew = programa.getDocenteList();
             List<Pensum> pensumListOld = persistentPrograma.getPensumList();
             List<Pensum> pensumListNew = programa.getPensumList();
             List<String> illegalOrphanMessages = null;
+            for (Docente docenteListOldDocente : docenteListOld) {
+                if (!docenteListNew.contains(docenteListOldDocente)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Docente " + docenteListOldDocente + " since its programaCodigo field is not nullable.");
+                }
+            }
             for (Pensum pensumListOldPensum : pensumListOld) {
                 if (!pensumListNew.contains(pensumListOldPensum)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain Pensum " + pensumListOldPensum + " since its programa field is not nullable.");
                 }
@@ -116,15 +133,18 @@ public class ProgramaJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (directorProgramaNew != null) {
-                directorProgramaNew = em.getReference(directorProgramaNew.getClass(), directorProgramaNew.getCodigoDocente());
-                programa.setDirectorPrograma(directorProgramaNew);
-            }
             if (departamentoIdNew != null) {
                 departamentoIdNew = em.getReference(departamentoIdNew.getClass(), departamentoIdNew.getId());
                 programa.setDepartamentoId(departamentoIdNew);
             }
-            List<Pensum> attachedPensumListNew = new ArrayList<>();
+            List<Docente> attachedDocenteListNew = new ArrayList<Docente>();
+            for (Docente docenteListNewDocenteToAttach : docenteListNew) {
+                docenteListNewDocenteToAttach = em.getReference(docenteListNewDocenteToAttach.getClass(), docenteListNewDocenteToAttach.getCodigo());
+                attachedDocenteListNew.add(docenteListNewDocenteToAttach);
+            }
+            docenteListNew = attachedDocenteListNew;
+            programa.setDocenteList(docenteListNew);
+            List<Pensum> attachedPensumListNew = new ArrayList<Pensum>();
             for (Pensum pensumListNewPensumToAttach : pensumListNew) {
                 pensumListNewPensumToAttach = em.getReference(pensumListNewPensumToAttach.getClass(), pensumListNewPensumToAttach.getPensumPK());
                 attachedPensumListNew.add(pensumListNewPensumToAttach);
@@ -132,14 +152,6 @@ public class ProgramaJpaController implements Serializable {
             pensumListNew = attachedPensumListNew;
             programa.setPensumList(pensumListNew);
             programa = em.merge(programa);
-            if (directorProgramaOld != null && !directorProgramaOld.equals(directorProgramaNew)) {
-                directorProgramaOld.getProgramaList().remove(programa);
-                directorProgramaOld = em.merge(directorProgramaOld);
-            }
-            if (directorProgramaNew != null && !directorProgramaNew.equals(directorProgramaOld)) {
-                directorProgramaNew.getProgramaList().add(programa);
-                directorProgramaNew = em.merge(directorProgramaNew);
-            }
             if (departamentoIdOld != null && !departamentoIdOld.equals(departamentoIdNew)) {
                 departamentoIdOld.getProgramaList().remove(programa);
                 departamentoIdOld = em.merge(departamentoIdOld);
@@ -147,6 +159,17 @@ public class ProgramaJpaController implements Serializable {
             if (departamentoIdNew != null && !departamentoIdNew.equals(departamentoIdOld)) {
                 departamentoIdNew.getProgramaList().add(programa);
                 departamentoIdNew = em.merge(departamentoIdNew);
+            }
+            for (Docente docenteListNewDocente : docenteListNew) {
+                if (!docenteListOld.contains(docenteListNewDocente)) {
+                    Programa oldProgramaCodigoOfDocenteListNewDocente = docenteListNewDocente.getProgramaCodigo();
+                    docenteListNewDocente.setProgramaCodigo(programa);
+                    docenteListNewDocente = em.merge(docenteListNewDocente);
+                    if (oldProgramaCodigoOfDocenteListNewDocente != null && !oldProgramaCodigoOfDocenteListNewDocente.equals(programa)) {
+                        oldProgramaCodigoOfDocenteListNewDocente.getDocenteList().remove(docenteListNewDocente);
+                        oldProgramaCodigoOfDocenteListNewDocente = em.merge(oldProgramaCodigoOfDocenteListNewDocente);
+                    }
+                }
             }
             for (Pensum pensumListNewPensum : pensumListNew) {
                 if (!pensumListOld.contains(pensumListNewPensum)) {
@@ -189,20 +212,22 @@ public class ProgramaJpaController implements Serializable {
                 throw new NonexistentEntityException("The programa with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
+            List<Docente> docenteListOrphanCheck = programa.getDocenteList();
+            for (Docente docenteListOrphanCheckDocente : docenteListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Programa (" + programa + ") cannot be destroyed since the Docente " + docenteListOrphanCheckDocente + " in its docenteList field has a non-nullable programaCodigo field.");
+            }
             List<Pensum> pensumListOrphanCheck = programa.getPensumList();
             for (Pensum pensumListOrphanCheckPensum : pensumListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Programa (" + programa + ") cannot be destroyed since the Pensum " + pensumListOrphanCheckPensum + " in its pensumList field has a non-nullable programa field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            Docente directorPrograma = programa.getDirectorPrograma();
-            if (directorPrograma != null) {
-                directorPrograma.getProgramaList().remove(programa);
-                directorPrograma = em.merge(directorPrograma);
             }
             Departamento departamentoId = programa.getDepartamentoId();
             if (departamentoId != null) {
@@ -263,5 +288,5 @@ public class ProgramaJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

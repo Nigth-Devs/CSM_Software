@@ -7,9 +7,13 @@ package dto;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
-import javax.persistence.EmbeddedId;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
@@ -22,47 +26,73 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "materia_periodo")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "MateriaPeriodo.findAll", query = "SELECT m FROM MateriaPeriodo m")
-    , @NamedQuery(name = "MateriaPeriodo.findByAnio", query = "SELECT m FROM MateriaPeriodo m WHERE m.materiaPeriodoPK.anio = :anio")
-    , @NamedQuery(name = "MateriaPeriodo.findBySemestreAnio", query = "SELECT m FROM MateriaPeriodo m WHERE m.materiaPeriodoPK.semestreAnio = :semestreAnio")
-    , @NamedQuery(name = "MateriaPeriodo.findByMateriaCodigoMateria", query = "SELECT m FROM MateriaPeriodo m WHERE m.materiaPeriodoPK.materiaCodigoMateria = :materiaCodigoMateria")
-    , @NamedQuery(name = "MateriaPeriodo.findByMateriaPensumCodigo", query = "SELECT m FROM MateriaPeriodo m WHERE m.materiaPeriodoPK.materiaPensumCodigo = :materiaPensumCodigo")})
+    , @NamedQuery(name = "MateriaPeriodo.findById", query = "SELECT m FROM MateriaPeriodo m WHERE m.id = :id")
+    , @NamedQuery(name = "MateriaPeriodo.findByAnio", query = "SELECT m FROM MateriaPeriodo m WHERE m.anio = :anio")
+    , @NamedQuery(name = "MateriaPeriodo.findByPeriodo", query = "SELECT m FROM MateriaPeriodo m WHERE m.periodo = :periodo")})
 public class MateriaPeriodo implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected MateriaPeriodoPK materiaPeriodoPK;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Integer id;
+    @Basic(optional = false)
+    @Column(name = "anio")
+    private int anio;
+    @Basic(optional = false)
+    @Column(name = "periodo")
+    private int periodo;
     @JoinColumns({
-        @JoinColumn(name = "materia_codigo_materia", referencedColumnName = "codigo_materia", insertable = false, updatable = false)
-        , @JoinColumn(name = "materia_pensum_codigo", referencedColumnName = "pensum_codigo", insertable = false, updatable = false)})
+        @JoinColumn(name = "codigo_materia", referencedColumnName = "codigo")
+        , @JoinColumn(name = "materia_pensum_codigo", referencedColumnName = "pensum_codigo")})
     @ManyToOne(optional = false)
     private Materia materia;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "materiaPeriodo")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "materiaPeriodoId")
     private List<MateriaPeriodoGrupo> materiaPeriodoGrupoList;
 
     public MateriaPeriodo() {
     }
 
-    public MateriaPeriodo(MateriaPeriodoPK materiaPeriodoPK) {
-        this.materiaPeriodoPK = materiaPeriodoPK;
+    public MateriaPeriodo(Integer id) {
+        this.id = id;
     }
 
-    public MateriaPeriodo(int anio, int semestreAnio, int materiaCodigoMateria, int materiaPensumCodigo) {
-        this.materiaPeriodoPK = new MateriaPeriodoPK(anio, semestreAnio, materiaCodigoMateria, materiaPensumCodigo);
+    public MateriaPeriodo(Integer id, int anio, int periodo) {
+        this.id = id;
+        this.anio = anio;
+        this.periodo = periodo;
     }
 
-    public MateriaPeriodoPK getMateriaPeriodoPK() {
-        return materiaPeriodoPK;
+    public Integer getId() {
+        return id;
     }
 
-    public void setMateriaPeriodoPK(MateriaPeriodoPK materiaPeriodoPK) {
-        this.materiaPeriodoPK = materiaPeriodoPK;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public int getAnio() {
+        return anio;
+    }
+
+    public void setAnio(int anio) {
+        this.anio = anio;
+    }
+
+    public int getPeriodo() {
+        return periodo;
+    }
+
+    public void setPeriodo(int periodo) {
+        this.periodo = periodo;
     }
 
     public Materia getMateria() {
@@ -85,7 +115,7 @@ public class MateriaPeriodo implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (materiaPeriodoPK != null ? materiaPeriodoPK.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -96,7 +126,7 @@ public class MateriaPeriodo implements Serializable {
             return false;
         }
         MateriaPeriodo other = (MateriaPeriodo) object;
-        if ((this.materiaPeriodoPK == null && other.materiaPeriodoPK != null) || (this.materiaPeriodoPK != null && !this.materiaPeriodoPK.equals(other.materiaPeriodoPK))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -104,7 +134,7 @@ public class MateriaPeriodo implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.MateriaPeriodo[ materiaPeriodoPK=" + materiaPeriodoPK + " ]";
+        return "dto.MateriaPeriodo[ id=" + id + " ]";
     }
-
+    
 }

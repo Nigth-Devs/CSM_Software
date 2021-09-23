@@ -18,16 +18,18 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import dao.AreaFormacionJpaController;
-import dao.TipoAsignaturaJpaController;
+import dao.TipoMateriaJpaController;
 import dto.AreaFormacion;
-import dto.EncabezadoTabla;
+import dto.ContenidoUnidad;
+import dto.Encabezado;
 import dto.Materia;
 import dto.Microcurriculo;
 import dto.PrerrequisitoMateria;
 import dto.SeccionMicrocurriculo;
-import dto.TablaMicrocurriculo;
-import dto.TablaMicrocurriculoInfo;
-import dto.TipoAsignatura;
+import dto.Tabla;
+import dto.TablaSeccion;
+import dto.TipoMateria;
+import dto.Unidad;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,7 +51,7 @@ public class MicrocurriculoPDF {
     private BaseFont bf;
     private Microcurriculo m;
     private List<AreaFormacion> areas;
-    private List<TipoAsignatura> ta;
+    private List<TipoMateria> ta;
     private Document doc;
     private String path;
     private File file;
@@ -59,12 +61,12 @@ public class MicrocurriculoPDF {
         this.m = m;
         this.path = path;
         this.path = new File(this.path).getParentFile().getParentFile().getAbsolutePath();
-        this.ta = new TipoAsignaturaJpaController(em).findTipoAsignaturaEntities();
+        this.ta = new TipoMateriaJpaController(em).findTipoMateriaEntities();
         this.areas = new AreaFormacionJpaController(em).findAreaFormacionEntities();
         this.bf = BaseFont.createFont(this.path + "\\fonts\\Roboto-Medium.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         TableHeader th = new TableHeader(this.getTablaEnca());
         this.doc = new Document(PageSize.A4, 36, 36, 20 + th.getTableHeight(), 36);
-        this.file = new File(this.path + "\\temp\\MICROCURRICULO_" + m.getMateria().getNombre() + "_" + m.getMateria().getMateriaPK().getCodigoMateria() + ".pdf");
+        this.file = new File(this.path + "\\temp\\MICROCURRICULO_" + m.getMateria().getNombre() + "_" + m.getMateria().getMateriaPK().getCodigo()+ ".pdf");
         PdfWriter.getInstance(this.doc, new FileOutputStream(this.file.getAbsolutePath())).setPageEvent(th);
     }
 
@@ -78,7 +80,7 @@ public class MicrocurriculoPDF {
             this.doc.add(getParapgraph(sm.getSeccionId().getNombre(), 11, Paragraph.ALIGN_CENTER));
             this.createBlank();
             if (sm.getSeccionId().getTipoSeccionId().getId() == 2) {
-                this.doc.add(this.getTabla(sm.getTablaMicrocurriculoList().get(0)));
+                this.doc.add(this.getTabla(sm));
             } else {
                 this.doc.add(getParapgraph(sm.getContenidoList().get(0).getTexto(), 9, Paragraph.ALIGN_JUSTIFIED));
             }
@@ -89,49 +91,53 @@ public class MicrocurriculoPDF {
         return is;
     }
     
-    private PdfPTable getTabla(TablaMicrocurriculo tm) throws DocumentException {
-        PdfPTable tab = new PdfPTable(tm.getCantidadColumnas());
-        if (tm.getTablaMicrocurriculoPK().getId() == 1) {
+    private PdfPTable getTabla(SeccionMicrocurriculo sm) throws DocumentException {
+        PdfPTable tab = new PdfPTable(sm.getTablaSeccion().getTablaId().getEncabezadoList().size());
+        tab.setWidthPercentage(100);
+        this.configEnca(tab, sm.getTablaSeccion().getTablaId());
+        if (sm.getSeccionId().getId() == 1) {
             tab.setWidths(new int[]{1, 3, 1, 1, 1});
         }
-        tab.setWidthPercentage(100);
-        this.configEnca(tab, tm);
-        String[][] infoOrder = this.getOrder(tm.getTablaMicrocurriculoInfoList(), tm.getCantidadFilas(), tm.getCantidadColumnas());
-        for (String x[] : infoOrder) {
-            for (String y : x) {
-                tab.addCell(getParapgraph(y, 9, Paragraph.ALIGN_CENTER));
+        int i=0;
+        for(Unidad unidad: this.m.getUnidadList()){
+            if (sm.getSeccionId().getId() == 1) {
+                if(i==0)tab.setWidths(new int[]{1, 3, 1, 1, 1});
+                tab.addCell(getParapgraph(""+unidad.getNum(), 9, Paragraph.ALIGN_CENTER));
+                tab.addCell(getParapgraph(unidad.getNombre(), 9, Paragraph.ALIGN_CENTER));
+                tab.addCell(getParapgraph(""+unidad.getHorasPresencial(), 9, Paragraph.ALIGN_CENTER));
+                tab.addCell(getParapgraph(""+unidad.getHorasIndependiente(), 9, Paragraph.ALIGN_CENTER));
+                tab.addCell(getParapgraph(""+(unidad.getHorasIndependiente()+unidad.getHorasIndependiente()), 9, Paragraph.ALIGN_CENTER));
+            }else{
+                for(ContenidoUnidad content: unidad.getContenidoUnidadList()){
+                    tab.addCell(getParapgraph(""+unidad.getNum(), 9, Paragraph.ALIGN_CENTER));
+                    tab.addCell(getParapgraph(content.getContenido(), 9, Paragraph.ALIGN_CENTER));
+                    tab.addCell(getParapgraph(content.getTrabajoPresencial(), 9, Paragraph.ALIGN_CENTER));
+                    tab.addCell(getParapgraph(content.getTrabajoIndependiente(), 9, Paragraph.ALIGN_CENTER));
+                }
             }
         }
         return tab;
     }
 
-    private String[][] getOrder(List<TablaMicrocurriculoInfo> tmis, int row, int col) {
-        String[][] info = new String[row][col];
-        for (TablaMicrocurriculoInfo tmi : tmis) {
-            info[tmi.getTablaMicrocurriculoInfoPK().getIdFila()][tmi.getTablaMicrocurriculoInfoPK().getIdColumna()] = tmi.getContenidoId().getTexto();
-        }
-        return info;
-    }
-
-    private void configEnca(PdfPTable tab, TablaMicrocurriculo tm) {
+    private void configEnca(PdfPTable tab, Tabla tm) {
         int i = 0;
-        for (EncabezadoTabla et : tm.getEncabezadoTablaList()) {
-            if (i++ == 2 && tm.getTablaMicrocurriculoPK().getId() == 1) {
+        for (Encabezado et : tm.getEncabezadoList()) {
+            if (i++ == 2 && tm.getId() == 1) {
                 tab.getDefaultCell().setColspan(2);
                 tab.addCell(this.getParapgraph("Dedicacion del estudiante (Horas)", 9, Paragraph.ALIGN_CENTER));
                 tab.getDefaultCell().setColspan(1);
                 tab.getDefaultCell().setRowspan(2);
-                tab.addCell(this.getParapgraph(tm.getEncabezadoTablaList().get(++i).getEncabezadoId().getNombre(), 9, Paragraph.ALIGN_CENTER));
+                tab.addCell(this.getParapgraph(et.getEncabezado(), 9, Paragraph.ALIGN_CENTER));
                 tab.getDefaultCell().setRowspan(1);
 
                 tab.addCell(this.getParapgraph("a)Trabajo Presencial", 9, Paragraph.ALIGN_CENTER));
                 tab.addCell(this.getParapgraph("b)Trabajo Independiente", 9, Paragraph.ALIGN_CENTER));
                 break;
             } else {
-                if (tm.getTablaMicrocurriculoPK().getId() == 1) {
+                if (tm.getId() == 1) {
                     tab.getDefaultCell().setRowspan(2);
                 }
-                tab.addCell(this.getParapgraph(et.getEncabezadoId().getNombre(), 9, Paragraph.ALIGN_CENTER));
+                tab.addCell(this.getParapgraph(et.getEncabezado(), 9, Paragraph.ALIGN_CENTER));
                 tab.getDefaultCell().setRowspan(1);
             }
         }
@@ -146,14 +152,14 @@ public class MicrocurriculoPDF {
         PdfPCell c = new PdfPCell(this.getParapgraph(
                 "UNIVERSIDAD FRANCISCO DE PAULA SANTANDER "
                 + "FACULTAD DE " + this.m.getMateria().getPensum().getPrograma().getDepartamentoId().getFacultadId().getNombre().toUpperCase() + " "
-                + "PROGRAMA " + this.m.getMateria().getPensum().getPrograma().getNombrePrograma().toUpperCase(),
+                + "PROGRAMA " + this.m.getMateria().getPensum().getPrograma().getNombre().toUpperCase(),
                 11, Paragraph.ALIGN_CENTER));
         c.setHorizontalAlignment(Paragraph.ALIGN_CENTER);
         c.setVerticalAlignment(Paragraph.ALIGN_MIDDLE);
         c.setFixedHeight(70);
         tab.addCell(c);
         tab.getDefaultCell().setRowspan(3);
-        tab.addCell(Image.getInstance(this.m.getMateria().getPensum().getPrograma().getImgPrograma()));
+        tab.addCell(Image.getInstance(this.m.getMateria().getPensum().getPrograma().getImagen()));
         tab.getDefaultCell().setRowspan(1);
         PdfPCell f = new PdfPCell(this.getParapgraph("Formato Syllabus", 11, Paragraph.ALIGN_CENTER));
         f.setHorizontalAlignment(Paragraph.ALIGN_CENTER);
@@ -172,7 +178,7 @@ public class MicrocurriculoPDF {
         tab.getDefaultCell().setColspan(1);
         tab.addCell(this.getParapgraph("Código", 10, Paragraph.ALIGN_LEFT));
         tab.getDefaultCell().setColspan(4);
-        tab.addCell(this.getParapgraph("" + ma.getMateriaPK().getCodigoMateria(), 10, Paragraph.ALIGN_LEFT));
+        tab.addCell(this.getParapgraph("" + ma.getMateriaPK().getCodigo(), 10, Paragraph.ALIGN_LEFT));
         tab.getDefaultCell().setColspan(1);
         tab.addCell(this.getParapgraph("Área de formación:", 10, Paragraph.ALIGN_LEFT));
         for (AreaFormacion a : this.areas) {
@@ -184,7 +190,7 @@ public class MicrocurriculoPDF {
         }
         tab.addCell(this.getParapgraph("Tipo de asignatura:", 10, Paragraph.ALIGN_LEFT));
         tab.getDefaultCell().setColspan(2);
-        for (TipoAsignatura t : this.ta) {
+        for (TipoMateria t : this.ta) {
             Phrase p = new Phrase(t.getTipo());
             if (this.m.getAreaDeFormacionId().getId().equals(t.getId())) {
                 p.add(this.getParapgraph(": X", 10, Paragraph.ALIGN_LEFT));
@@ -200,7 +206,7 @@ public class MicrocurriculoPDF {
         tab.getDefaultCell().setColspan(4);
         String pr = "";
         for (PrerrequisitoMateria pm : ma.getPrerrequisitoMateriaList()) {
-            pr += pm.getMateria1().getMateriaPK().getCodigoMateria() + " - " + pm.getMateria1().getNombre();
+            pr += pm.getMateria1().getMateriaPK().getCodigo()+ " - " + pm.getMateria1().getNombre();
         }
         tab.addCell(this.getParapgraph(pr, 10, Paragraph.ALIGN_LEFT));
         tab.setWidthPercentage(100);

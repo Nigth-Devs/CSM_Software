@@ -12,14 +12,14 @@ import javax.persistence.Embeddable;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Embeddable
 public class MateriaPK implements Serializable {
 
     @Basic(optional = false)
-    @Column(name = "codigo_materia")
-    private int codigoMateria;
+    @Column(name = "codigo")
+    private int codigo;
     @Basic(optional = false)
     @Column(name = "pensum_codigo")
     private int pensumCodigo;
@@ -27,17 +27,17 @@ public class MateriaPK implements Serializable {
     public MateriaPK() {
     }
 
-    public MateriaPK(int codigoMateria, int pensumCodigo) {
-        this.codigoMateria = codigoMateria;
+    public MateriaPK(int codigo, int pensumCodigo) {
+        this.codigo = codigo;
         this.pensumCodigo = pensumCodigo;
     }
 
-    public int getCodigoMateria() {
-        return codigoMateria;
+    public int getCodigo() {
+        return codigo;
     }
 
-    public void setCodigoMateria(int codigoMateria) {
-        this.codigoMateria = codigoMateria;
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
     }
 
     public int getPensumCodigo() {
@@ -51,7 +51,7 @@ public class MateriaPK implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (int) codigoMateria;
+        hash += (int) codigo;
         hash += (int) pensumCodigo;
         return hash;
     }
@@ -63,7 +63,7 @@ public class MateriaPK implements Serializable {
             return false;
         }
         MateriaPK other = (MateriaPK) object;
-        if (this.codigoMateria != other.codigoMateria) {
+        if (this.codigo != other.codigo) {
             return false;
         }
         if (this.pensumCodigo != other.pensumCodigo) {
@@ -74,7 +74,7 @@ public class MateriaPK implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.MateriaPK[ codigoMateria=" + codigoMateria + ", pensumCodigo=" + pensumCodigo + " ]";
+        return "dto.MateriaPK[ codigo=" + codigo + ", pensumCodigo=" + pensumCodigo + " ]";
     }
-
+    
 }

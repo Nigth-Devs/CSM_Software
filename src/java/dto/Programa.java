@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "programa")
@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Programa.findAll", query = "SELECT p FROM Programa p")
     , @NamedQuery(name = "Programa.findByCodigo", query = "SELECT p FROM Programa p WHERE p.codigo = :codigo")
-    , @NamedQuery(name = "Programa.findByNombrePrograma", query = "SELECT p FROM Programa p WHERE p.nombrePrograma = :nombrePrograma")})
+    , @NamedQuery(name = "Programa.findByNombre", query = "SELECT p FROM Programa p WHERE p.nombre = :nombre")})
 public class Programa implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -41,17 +41,16 @@ public class Programa implements Serializable {
     @Column(name = "codigo")
     private Integer codigo;
     @Basic(optional = false)
-    @Column(name = "nombre_programa")
-    private String nombrePrograma;
+    @Column(name = "nombre")
+    private String nombre;
     @Lob
-    @Column(name = "img_programa")
-    private byte[] imgPrograma;
-    @JoinColumn(name = "director_programa", referencedColumnName = "codigo_docente")
-    @ManyToOne(optional = false)
-    private Docente directorPrograma;
+    @Column(name = "imagen")
+    private byte[] imagen;
     @JoinColumn(name = "departamento_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Departamento departamentoId;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "programaCodigo")
+    private List<Docente> docenteList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "programa")
     private List<Pensum> pensumList;
 
@@ -62,9 +61,9 @@ public class Programa implements Serializable {
         this.codigo = codigo;
     }
 
-    public Programa(Integer codigo, String nombrePrograma) {
+    public Programa(Integer codigo, String nombre) {
         this.codigo = codigo;
-        this.nombrePrograma = nombrePrograma;
+        this.nombre = nombre;
     }
 
     public Integer getCodigo() {
@@ -75,28 +74,20 @@ public class Programa implements Serializable {
         this.codigo = codigo;
     }
 
-    public String getNombrePrograma() {
-        return nombrePrograma;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNombrePrograma(String nombrePrograma) {
-        this.nombrePrograma = nombrePrograma;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-    public byte[] getImgPrograma() {
-        return imgPrograma;
+    public byte[] getImagen() {
+        return imagen;
     }
 
-    public void setImgPrograma(byte[] imgPrograma) {
-        this.imgPrograma = imgPrograma;
-    }
-
-    public Docente getDirectorPrograma() {
-        return directorPrograma;
-    }
-
-    public void setDirectorPrograma(Docente directorPrograma) {
-        this.directorPrograma = directorPrograma;
+    public void setImagen(byte[] imagen) {
+        this.imagen = imagen;
     }
 
     public Departamento getDepartamentoId() {
@@ -105,6 +96,15 @@ public class Programa implements Serializable {
 
     public void setDepartamentoId(Departamento departamentoId) {
         this.departamentoId = departamentoId;
+    }
+
+    @XmlTransient
+    public List<Docente> getDocenteList() {
+        return docenteList;
+    }
+
+    public void setDocenteList(List<Docente> docenteList) {
+        this.docenteList = docenteList;
     }
 
     @XmlTransient
@@ -140,5 +140,5 @@ public class Programa implements Serializable {
     public String toString() {
         return "dto.Programa[ codigo=" + codigo + " ]";
     }
-
+    
 }

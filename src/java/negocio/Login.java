@@ -5,9 +5,10 @@
  */
 package negocio;
 
+import dao.UsuarioJpaController;
+import dto.Docente;
 import dto.Rol;
 import dto.Usuario;
-import dto.UsuarioPK;
 import util.Conexion;
 import util.PasswordAuthentication;
 
@@ -20,52 +21,39 @@ public class Login {
     public Login() {
     }
 
-    public boolean validarUsuario(int codigo, String contrasena, int rol) {
+    public Usuario validarUsuario(int codigo, String contrasena, int rol) {
         Conexion con = Conexion.getConexion();
-        dao.UsuarioJpaController daoUsuario = new dao.UsuarioJpaController(con.getBd());
-        dto.UsuarioPK usuarioPk = new dto.UsuarioPK(rol, codigo);
-        dto.Usuario usuario = daoUsuario.findUsuario(usuarioPk);
-        if (usuario != null && autenticarContra(contrasena, codigo, rol) && usuario.getDocente().getEstado() == 1) {
-            return true;
-        } else {
-            return false;
-        }
-
+        UsuarioJpaController daoUsuario = new UsuarioJpaController(con.getBd());
+        
+        Usuario usuario = daoUsuario.findUsuario(codigo);
+        
+        return autenticarContra(usuario, contrasena, rol) ? usuario : null;
     }
-
-    public dto.Usuario obtenerUsuario(int codigo, int rol) {
-        Conexion con = Conexion.getConexion();
-        dao.UsuarioJpaController daoUsuario = new dao.UsuarioJpaController(con.getBd());
-        dto.UsuarioPK usuarioPk = new dto.UsuarioPK(rol, codigo);
-        dto.Usuario usuario = daoUsuario.findUsuario(usuarioPk);
-        return usuario;
-    }
-
+    
     public dto.Docente obtenerDocente(int codigo) {
         Conexion con = Conexion.getConexion();
         dao.DocenteJpaController daoDocente = new dao.DocenteJpaController(con.getBd());
         return daoDocente.findDocente(codigo);
     }
 
-    public void guardarDocente(String password, int codigo) throws Exception {
+    public void guardarUsuario(Docente docente, String password) throws Exception {
         Conexion con = Conexion.getConexion();
         PasswordAuthentication encriptarPass = new PasswordAuthentication();
-        dao.DocenteJpaController daoDocente = new dao.DocenteJpaController(con.getBd());
         dao.UsuarioJpaController daoUsuario = new dao.UsuarioJpaController(con.getBd());
+        
         password = encriptarPass.hash(password.toCharArray()); //encriptando password
-        UsuarioPK upk = new UsuarioPK(0, codigo);
-        Usuario usuario = new Usuario(upk, password);
-        usuario.setRol(new Rol(2));
-        usuario.setDocente(daoDocente.findDocente(codigo));
-        upk.setDocenteCodigo(codigo);
+        
+        Usuario usuario = new Usuario(docente.getCodigo());
+        usuario.setRolId(new Rol(2));
+        usuario.setDocente(docente);
+        usuario.setClave(password);
+        
         daoUsuario.create(usuario); //usuario creado
     }
 
-    public boolean autenticarContra(String password, int codigo, int rol) {
+    public boolean autenticarContra(Usuario usuario, String password, int rol) {
         PasswordAuthentication encriptarPass = new PasswordAuthentication();
-        Conexion con = Conexion.getConexion();
-        dao.UsuarioJpaController daoUsuario = new dao.UsuarioJpaController(con.getBd());
-        Usuario u = daoUsuario.findUsuario(new UsuarioPK(rol, codigo));
-        return encriptarPass.authenticate(password, u.getClave());
+        boolean correctPass = encriptarPass.authenticate(password.toCharArray(), usuario.getClave());
+        return correctPass && usuario.getRolId().getId() == rol && usuario.getDocente().getEstado() == 1;
     }
 }

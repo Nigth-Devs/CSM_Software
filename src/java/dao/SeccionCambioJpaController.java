@@ -20,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class SeccionCambioJpaController implements Serializable {
 
@@ -221,5 +221,5 @@ public class SeccionCambioJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

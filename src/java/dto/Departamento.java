@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "departamento")
@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Departamento.findAll", query = "SELECT d FROM Departamento d")
     , @NamedQuery(name = "Departamento.findById", query = "SELECT d FROM Departamento d WHERE d.id = :id")
-    , @NamedQuery(name = "Departamento.findByNombreDepartamento", query = "SELECT d FROM Departamento d WHERE d.nombreDepartamento = :nombreDepartamento")})
+    , @NamedQuery(name = "Departamento.findByNombre", query = "SELECT d FROM Departamento d WHERE d.nombre = :nombre")})
 public class Departamento implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,12 +43,10 @@ public class Departamento implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
-    @Column(name = "nombre_departamento")
-    private String nombreDepartamento;
+    @Column(name = "nombre")
+    private String nombre;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "departamentoId")
     private List<Programa> programaList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "departamentoId")
-    private List<Docente> docenteList;
     @JoinColumn(name = "facultad_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Facultad facultadId;
@@ -60,9 +58,9 @@ public class Departamento implements Serializable {
         this.id = id;
     }
 
-    public Departamento(Integer id, String nombreDepartamento) {
+    public Departamento(Integer id, String nombre) {
         this.id = id;
-        this.nombreDepartamento = nombreDepartamento;
+        this.nombre = nombre;
     }
 
     public Integer getId() {
@@ -73,12 +71,12 @@ public class Departamento implements Serializable {
         this.id = id;
     }
 
-    public String getNombreDepartamento() {
-        return nombreDepartamento;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNombreDepartamento(String nombreDepartamento) {
-        this.nombreDepartamento = nombreDepartamento;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     @XmlTransient
@@ -88,15 +86,6 @@ public class Departamento implements Serializable {
 
     public void setProgramaList(List<Programa> programaList) {
         this.programaList = programaList;
-    }
-
-    @XmlTransient
-    public List<Docente> getDocenteList() {
-        return docenteList;
-    }
-
-    public void setDocenteList(List<Docente> docenteList) {
-        this.docenteList = docenteList;
     }
 
     public Facultad getFacultadId() {
@@ -131,5 +120,5 @@ public class Departamento implements Serializable {
     public String toString() {
         return "dto.Departamento[ id=" + id + " ]";
     }
-
+    
 }

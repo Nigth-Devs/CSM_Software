@@ -1,14 +1,16 @@
 <%@page import="dto.Usuario"%>
-<% Usuario user = (Usuario) request.getSession().getAttribute("usuario");%>
+<%
+    Usuario user = (Usuario) request.getSession().getAttribute("usuario");
+    String rol = (user.getRolId().getId() == 1) ? "director" : "docente";
+%>
 <nav class="navbar navbar-header navbar-expand-lg" data-background-color="red">
     <div class="container-fluid ">
         <div class="d-inline-flex">
             <div class="avatar"><img src="<%=request.getContextPath()%>/CSM_Software/assets/img/logo_ingsistemas.png"
                                      alt="logotipo de ing Sistemas" class="avatar-img rounded"></div>
-            <h1 class=" ml-3 text-white d-flex align-items-center">Ingeniería de Sistemas</h1>
+            <h1 class=" ml-3 text-white d-flex align-items-center">Ingenieria de Sistemas</h1>
         </div>
         <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
-
             <li class="nav-item dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button"
                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -89,15 +91,15 @@
                                 </div>
                                 <div class="u-text"> 
                                     <h4><%=user.getDocente().getNombre()%></h4>
-                                    <p class="text-muted"><%=user.getRol().getRol()%></p>
+                                    <p class="text-muted"><%=user.getRolId().getRol() %></p>
                                 </div>
                             </div>
                         </li>
                         <li>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="<%=request.getContextPath()%>/CSM_Software/CSM/director/dashboard/perfil/profile.jsp">Perfil</a>
+                            <a class="dropdown-item" href="<%=request.getContextPath()%>/CSM_Software/CSM/<%=rol%>/dashboard/perfil/profile.jsp">Perfil</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="<%=request.getContextPath()%>/CSM_Software/CSM/director/dashboard/perfil/edit-profile.jsp">Configuración</a>
+                            <a class="dropdown-item" href="<%=request.getContextPath()%>/CSM_Software/CSM/<%=rol%>/dashboard/perfil/edit-profile.jsp">Configuracion</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="<%=request.getContextPath()%>/CSM_Software/CSM/sign-in/singin.jsp">Salir</a>
                         </li>

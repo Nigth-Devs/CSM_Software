@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "cambio")
@@ -103,5 +103,5 @@ public class Cambio implements Serializable {
     public String toString() {
         return "dto.Cambio[ id=" + id + " ]";
     }
-
+    
 }

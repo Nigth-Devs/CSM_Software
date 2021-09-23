@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "seccion")
@@ -120,5 +120,5 @@ public class Seccion implements Serializable {
     public String toString() {
         return "dto.Seccion[ id=" + id + " ]";
     }
-
+    
 }

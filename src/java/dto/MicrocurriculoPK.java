@@ -12,17 +12,14 @@ import javax.persistence.Embeddable;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Embeddable
 public class MicrocurriculoPK implements Serializable {
 
     @Basic(optional = false)
-    @Column(name = "id")
-    private int id;
-    @Basic(optional = false)
-    @Column(name = "materia_codigo_materia")
-    private int materiaCodigoMateria;
+    @Column(name = "materia_codigo")
+    private int materiaCodigo;
     @Basic(optional = false)
     @Column(name = "materia_pensum_codigo")
     private int materiaPensumCodigo;
@@ -30,26 +27,17 @@ public class MicrocurriculoPK implements Serializable {
     public MicrocurriculoPK() {
     }
 
-    public MicrocurriculoPK(int id, int materiaCodigoMateria, int materiaPensumCodigo) {
-        this.id = id;
-        this.materiaCodigoMateria = materiaCodigoMateria;
+    public MicrocurriculoPK(int materiaCodigo, int materiaPensumCodigo) {
+        this.materiaCodigo = materiaCodigo;
         this.materiaPensumCodigo = materiaPensumCodigo;
     }
 
-    public int getId() {
-        return id;
+    public int getMateriaCodigo() {
+        return materiaCodigo;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getMateriaCodigoMateria() {
-        return materiaCodigoMateria;
-    }
-
-    public void setMateriaCodigoMateria(int materiaCodigoMateria) {
-        this.materiaCodigoMateria = materiaCodigoMateria;
+    public void setMateriaCodigo(int materiaCodigo) {
+        this.materiaCodigo = materiaCodigo;
     }
 
     public int getMateriaPensumCodigo() {
@@ -63,8 +51,7 @@ public class MicrocurriculoPK implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (int) id;
-        hash += (int) materiaCodigoMateria;
+        hash += (int) materiaCodigo;
         hash += (int) materiaPensumCodigo;
         return hash;
     }
@@ -76,10 +63,7 @@ public class MicrocurriculoPK implements Serializable {
             return false;
         }
         MicrocurriculoPK other = (MicrocurriculoPK) object;
-        if (this.id != other.id) {
-            return false;
-        }
-        if (this.materiaCodigoMateria != other.materiaCodigoMateria) {
+        if (this.materiaCodigo != other.materiaCodigo) {
             return false;
         }
         if (this.materiaPensumCodigo != other.materiaPensumCodigo) {
@@ -90,7 +74,7 @@ public class MicrocurriculoPK implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.MicrocurriculoPK[ id=" + id + ", materiaCodigoMateria=" + materiaCodigoMateria + ", materiaPensumCodigo=" + materiaPensumCodigo + " ]";
+        return "dto.MicrocurriculoPK[ materiaCodigo=" + materiaCodigo + ", materiaPensumCodigo=" + materiaPensumCodigo + " ]";
     }
-
+    
 }

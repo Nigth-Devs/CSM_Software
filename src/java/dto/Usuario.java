@@ -8,64 +8,62 @@ package dto;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "usuario")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u")
-    , @NamedQuery(name = "Usuario.findByRolId", query = "SELECT u FROM Usuario u WHERE u.usuarioPK.rolId = :rolId")
-    , @NamedQuery(name = "Usuario.findByClave", query = "SELECT u FROM Usuario u WHERE u.clave = :clave")
-    , @NamedQuery(name = "Usuario.findByDocenteCodigo", query = "SELECT u FROM Usuario u WHERE u.usuarioPK.docenteCodigo = :docenteCodigo")})
+    , @NamedQuery(name = "Usuario.findByDocenteCodigo", query = "SELECT u FROM Usuario u WHERE u.docenteCodigo = :docenteCodigo")
+    , @NamedQuery(name = "Usuario.findByClave", query = "SELECT u FROM Usuario u WHERE u.clave = :clave")})
 public class Usuario implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected UsuarioPK usuarioPK;
+    @Id
+    @Basic(optional = false)
+    @Column(name = "docente_codigo")
+    private Integer docenteCodigo;
     @Basic(optional = false)
     @Column(name = "clave")
     private String clave;
-    @JoinColumn(name = "rol_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "rol_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Rol rol;
-    @JoinColumn(name = "docente_codigo", referencedColumnName = "codigo_docente", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
+    private Rol rolId;
+    @JoinColumn(name = "docente_codigo", referencedColumnName = "codigo", insertable = false, updatable = false)
+    @OneToOne(optional = false)
     private Docente docente;
 
     public Usuario() {
     }
 
-    public Usuario(UsuarioPK usuarioPK) {
-        this.usuarioPK = usuarioPK;
+    public Usuario(Integer docenteCodigo) {
+        this.docenteCodigo = docenteCodigo;
     }
 
-    public Usuario(UsuarioPK usuarioPK, String clave) {
-        this.usuarioPK = usuarioPK;
+    public Usuario(Integer docenteCodigo, String clave) {
+        this.docenteCodigo = docenteCodigo;
         this.clave = clave;
     }
 
-    public Usuario(int rolId, int docenteCodigo) {
-        this.usuarioPK = new UsuarioPK(rolId, docenteCodigo);
+    public Integer getDocenteCodigo() {
+        return docenteCodigo;
     }
 
-    public UsuarioPK getUsuarioPK() {
-        return usuarioPK;
-    }
-
-    public void setUsuarioPK(UsuarioPK usuarioPK) {
-        this.usuarioPK = usuarioPK;
+    public void setDocenteCodigo(Integer docenteCodigo) {
+        this.docenteCodigo = docenteCodigo;
     }
 
     public String getClave() {
@@ -76,12 +74,12 @@ public class Usuario implements Serializable {
         this.clave = clave;
     }
 
-    public Rol getRol() {
-        return rol;
+    public Rol getRolId() {
+        return rolId;
     }
 
-    public void setRol(Rol rol) {
-        this.rol = rol;
+    public void setRolId(Rol rolId) {
+        this.rolId = rolId;
     }
 
     public Docente getDocente() {
@@ -95,7 +93,7 @@ public class Usuario implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (usuarioPK != null ? usuarioPK.hashCode() : 0);
+        hash += (docenteCodigo != null ? docenteCodigo.hashCode() : 0);
         return hash;
     }
 
@@ -106,7 +104,7 @@ public class Usuario implements Serializable {
             return false;
         }
         Usuario other = (Usuario) object;
-        if ((this.usuarioPK == null && other.usuarioPK != null) || (this.usuarioPK != null && !this.usuarioPK.equals(other.usuarioPK))) {
+        if ((this.docenteCodigo == null && other.docenteCodigo != null) || (this.docenteCodigo != null && !this.docenteCodigo.equals(other.docenteCodigo))) {
             return false;
         }
         return true;
@@ -114,7 +112,7 @@ public class Usuario implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.Usuario[ usuarioPK=" + usuarioPK + " ]";
+        return "dto.Usuario[ docenteCodigo=" + docenteCodigo + " ]";
     }
-
+    
 }

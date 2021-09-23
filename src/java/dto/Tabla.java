@@ -6,31 +6,32 @@
 package dto;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
-@Table(name = "encabezado_tabla")
+@Table(name = "tabla")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "EncabezadoTabla.findAll", query = "SELECT e FROM EncabezadoTabla e")
-    , @NamedQuery(name = "EncabezadoTabla.findById", query = "SELECT e FROM EncabezadoTabla e WHERE e.id = :id")})
-public class EncabezadoTabla implements Serializable {
+    @NamedQuery(name = "Tabla.findAll", query = "SELECT t FROM Tabla t")
+    , @NamedQuery(name = "Tabla.findById", query = "SELECT t FROM Tabla t WHERE t.id = :id")})
+public class Tabla implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -38,19 +39,15 @@ public class EncabezadoTabla implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @JoinColumn(name = "encabezado_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Encabezado encabezadoId;
-    @JoinColumns({
-        @JoinColumn(name = "tabla_microcurriculo_id", referencedColumnName = "id")
-        , @JoinColumn(name = "tabla_microcurriculo_seccion_microcurriculo_id", referencedColumnName = "seccion_microcurriculo_id")})
-    @ManyToOne(optional = false)
-    private TablaMicrocurriculo tablaMicrocurriculo;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tabla")
+    private List<Encabezado> encabezadoList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tablaId")
+    private List<TablaSeccion> tablaSeccionList;
 
-    public EncabezadoTabla() {
+    public Tabla() {
     }
 
-    public EncabezadoTabla(Integer id) {
+    public Tabla(Integer id) {
         this.id = id;
     }
 
@@ -62,20 +59,22 @@ public class EncabezadoTabla implements Serializable {
         this.id = id;
     }
 
-    public Encabezado getEncabezadoId() {
-        return encabezadoId;
+    @XmlTransient
+    public List<Encabezado> getEncabezadoList() {
+        return encabezadoList;
     }
 
-    public void setEncabezadoId(Encabezado encabezadoId) {
-        this.encabezadoId = encabezadoId;
+    public void setEncabezadoList(List<Encabezado> encabezadoList) {
+        this.encabezadoList = encabezadoList;
     }
 
-    public TablaMicrocurriculo getTablaMicrocurriculo() {
-        return tablaMicrocurriculo;
+    @XmlTransient
+    public List<TablaSeccion> getTablaSeccionList() {
+        return tablaSeccionList;
     }
 
-    public void setTablaMicrocurriculo(TablaMicrocurriculo tablaMicrocurriculo) {
-        this.tablaMicrocurriculo = tablaMicrocurriculo;
+    public void setTablaSeccionList(List<TablaSeccion> tablaSeccionList) {
+        this.tablaSeccionList = tablaSeccionList;
     }
 
     @Override
@@ -88,10 +87,10 @@ public class EncabezadoTabla implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof EncabezadoTabla)) {
+        if (!(object instanceof Tabla)) {
             return false;
         }
-        EncabezadoTabla other = (EncabezadoTabla) object;
+        Tabla other = (Tabla) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -100,7 +99,7 @@ public class EncabezadoTabla implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.EncabezadoTabla[ id=" + id + " ]";
+        return "dto.Tabla[ id=" + id + " ]";
     }
-
+    
 }

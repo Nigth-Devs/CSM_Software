@@ -6,6 +6,7 @@
 package control;
 
 import dto.Docente;
+import dto.Microcurriculo;
 import dto.Usuario;
 import java.io.IOException;
 import java.util.List;
@@ -16,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import negocio.AdministrarMicrocurriculo;
 import negocio.Login;
-import negocio.RolDocente;
 
 /**
  *
@@ -87,13 +87,8 @@ public class ControladorMicrocurriculoDocente extends HttpServlet {
     }
 
     public void microDocentes(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        RolDocente rd = new RolDocente();
         Usuario u = (Usuario) request.getSession().getAttribute("usuario");
-        Usuario nuevoUser = rd.buscarUsuario(u.getDocente().getCodigoDocente());
-        Login l = new Login();
-        Docente d = l.obtenerDocente(nuevoUser.getDocente().getCodigoDocente());
-        int codigo = nuevoUser.getDocente().getCodigoDocente();
-        request.getSession().setAttribute("misMicrocurriculos", rd.microcurriculosDocentes(codigo));
+        request.getSession().setAttribute("misMicrocurriculos", u.getDocente().getMateriaPeriodoGrupoList());
         response.sendRedirect("jspTest/microcurriculoDocente.jsp");
     }
 
@@ -101,7 +96,7 @@ public class ControladorMicrocurriculoDocente extends HttpServlet {
         request.getSession().removeAttribute("materias");
         AdministrarMicrocurriculo adminMicrocurriculo = new AdministrarMicrocurriculo();
         dto.Usuario usuario = (dto.Usuario) request.getSession().getAttribute("usuario");
-        List<dto.Materia> materias = adminMicrocurriculo.obtenerTodasMateria(usuario.getDocente().getProgramaList().get(0).getCodigo());
+        List<dto.Materia> materias = adminMicrocurriculo.obtenerTodasMateria(usuario.getDocente().getProgramaCodigo());
         request.getSession().setAttribute("areasFormacion", adminMicrocurriculo.obtenerAreasFormacion());
         request.getSession().setAttribute("tipoAsignatura", adminMicrocurriculo.obtenerTiposAisgnatura());
         request.getSession().setAttribute("materias", materias);
@@ -109,38 +104,42 @@ public class ControladorMicrocurriculoDocente extends HttpServlet {
     }
 
     public void editar(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("idMicrocurriculo"));
         int codigoPensum = Integer.parseInt(request.getParameter("codigoPensum"));
         int codigoMateria = Integer.parseInt(request.getParameter("codigoMateria"));
-        negocio.AdministrarMicrocurriculo adminMicrocurriculo = new negocio.AdministrarMicrocurriculo();
-        dto.Microcurriculo microcurriculo = adminMicrocurriculo.obtenerMicrocurriculo(id, codigoMateria, codigoPensum);
-        request.getSession().setAttribute("tablas", negocio.AdministrarMicrocurriculo.ordenarTablaInfo(microcurriculo));
+        AdministrarMicrocurriculo adminMicrocurriculo = new AdministrarMicrocurriculo();
+        Microcurriculo microcurriculo = adminMicrocurriculo.obtenerMicrocurriculo(codigoMateria, codigoPensum);
+//        request.getSession().setAttribute("tablas", adminMicrocurriculo.ordenarTablaInfo(microcurriculo));
         request.getSession().setAttribute("microcurriculo", microcurriculo);
         response.sendRedirect("jspTest/microcurriculoDocente.jsp");
     }
 
     public void solicitud(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("idMicrocurriculo"));
         int codigoPensum = Integer.parseInt(request.getParameter("codigoPensum"));
         int codigoMateria = Integer.parseInt(request.getParameter("codigoMateria"));
         negocio.AdministrarMicrocurriculo adminMicrocurriculo = new negocio.AdministrarMicrocurriculo();
-        dto.Microcurriculo microcurriculo = adminMicrocurriculo.obtenerMicrocurriculo(id, codigoMateria, codigoPensum);
-        request.getSession().setAttribute("tablas", negocio.AdministrarMicrocurriculo.ordenarTablaInfo(microcurriculo));
+        Microcurriculo microcurriculo = adminMicrocurriculo.obtenerMicrocurriculo(codigoMateria, codigoPensum);
+//        request.getSession().setAttribute("tablas", adminMicrocurriculo.ordenarTablaInfo(microcurriculo));
         request.getSession().setAttribute("microcurriculo", microcurriculo);
         response.sendRedirect("CSM_Software/CSM/docente/dashboard/microcurriculo/solicitud-microcurriculo.jsp");
     }
 
     public void consultar(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("idMicrocurriculo"));
         int codigoPensum = Integer.parseInt(request.getParameter("codigoPensum"));
         int codigoMateria = Integer.parseInt(request.getParameter("codigoMateria"));
-        negocio.AdministrarMicrocurriculo adminMicrocurriculo = new negocio.AdministrarMicrocurriculo();
-        dto.Microcurriculo microcurriculo = adminMicrocurriculo.obtenerMicrocurriculo(id, codigoMateria, codigoPensum);
-        request.getSession().setAttribute("tablas", negocio.AdministrarMicrocurriculo.ordenarTablaInfo(microcurriculo));
+        AdministrarMicrocurriculo adminMicrocurriculo = new AdministrarMicrocurriculo();
+        Microcurriculo microcurriculo = adminMicrocurriculo.obtenerMicrocurriculo(codigoMateria, codigoPensum);
+//        request.getSession().setAttribute("tablas", adminMicrocurriculo.ordenarTablaInfo(microcurriculo));
         request.getSession().setAttribute("microcurriculo", microcurriculo);
         response.sendRedirect("CSM_Software/CSM/docente/dashboard/microcurriculo/ver-microcurriculo.jsp");
     }
 
+    /**
+     * Se debe ajustar al nuevo modelo
+     * @param request
+     * @param response
+     * @throws IOException 
+     */
+    @Deprecated
     private void solicitarCambio(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String idSeccionMicrocurriculo = request.getParameter("idseccionmicrocurriculo");
         String contenido = request.getParameter("contenidonuevo");

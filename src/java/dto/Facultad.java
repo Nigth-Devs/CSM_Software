@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "facultad")
@@ -107,5 +107,5 @@ public class Facultad implements Serializable {
     public String toString() {
         return "dto.Facultad[ id=" + id + " ]";
     }
-
+    
 }

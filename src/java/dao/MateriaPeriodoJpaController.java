@@ -7,7 +7,6 @@ package dao;
 
 import dao.exceptions.IllegalOrphanException;
 import dao.exceptions.NonexistentEntityException;
-import dao.exceptions.PreexistingEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
@@ -16,7 +15,6 @@ import javax.persistence.criteria.Root;
 import dto.Materia;
 import dto.MateriaPeriodo;
 import dto.MateriaPeriodoGrupo;
-import dto.MateriaPeriodoPK;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -24,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class MateriaPeriodoJpaController implements Serializable {
 
@@ -37,15 +35,10 @@ public class MateriaPeriodoJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(MateriaPeriodo materiaPeriodo) throws PreexistingEntityException, Exception {
-        if (materiaPeriodo.getMateriaPeriodoPK() == null) {
-            materiaPeriodo.setMateriaPeriodoPK(new MateriaPeriodoPK());
-        }
+    public void create(MateriaPeriodo materiaPeriodo) {
         if (materiaPeriodo.getMateriaPeriodoGrupoList() == null) {
             materiaPeriodo.setMateriaPeriodoGrupoList(new ArrayList<MateriaPeriodoGrupo>());
         }
-        materiaPeriodo.getMateriaPeriodoPK().setMateriaPensumCodigo(materiaPeriodo.getMateria().getMateriaPK().getPensumCodigo());
-        materiaPeriodo.getMateriaPeriodoPK().setMateriaCodigoMateria(materiaPeriodo.getMateria().getMateriaPK().getCodigoMateria());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -55,9 +48,9 @@ public class MateriaPeriodoJpaController implements Serializable {
                 materia = em.getReference(materia.getClass(), materia.getMateriaPK());
                 materiaPeriodo.setMateria(materia);
             }
-            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoList = new ArrayList<>();
+            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoList = new ArrayList<MateriaPeriodoGrupo>();
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach : materiaPeriodo.getMateriaPeriodoGrupoList()) {
-                materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getMateriaPeriodoGrupoPK());
+                materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach.getId());
                 attachedMateriaPeriodoGrupoList.add(materiaPeriodoGrupoListMateriaPeriodoGrupoToAttach);
             }
             materiaPeriodo.setMateriaPeriodoGrupoList(attachedMateriaPeriodoGrupoList);
@@ -67,20 +60,15 @@ public class MateriaPeriodoJpaController implements Serializable {
                 materia = em.merge(materia);
             }
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListMateriaPeriodoGrupo : materiaPeriodo.getMateriaPeriodoGrupoList()) {
-                MateriaPeriodo oldMateriaPeriodoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = materiaPeriodoGrupoListMateriaPeriodoGrupo.getMateriaPeriodo();
-                materiaPeriodoGrupoListMateriaPeriodoGrupo.setMateriaPeriodo(materiaPeriodo);
+                MateriaPeriodo oldMateriaPeriodoIdOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = materiaPeriodoGrupoListMateriaPeriodoGrupo.getMateriaPeriodoId();
+                materiaPeriodoGrupoListMateriaPeriodoGrupo.setMateriaPeriodoId(materiaPeriodo);
                 materiaPeriodoGrupoListMateriaPeriodoGrupo = em.merge(materiaPeriodoGrupoListMateriaPeriodoGrupo);
-                if (oldMateriaPeriodoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo != null) {
-                    oldMateriaPeriodoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListMateriaPeriodoGrupo);
-                    oldMateriaPeriodoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = em.merge(oldMateriaPeriodoOfMateriaPeriodoGrupoListMateriaPeriodoGrupo);
+                if (oldMateriaPeriodoIdOfMateriaPeriodoGrupoListMateriaPeriodoGrupo != null) {
+                    oldMateriaPeriodoIdOfMateriaPeriodoGrupoListMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListMateriaPeriodoGrupo);
+                    oldMateriaPeriodoIdOfMateriaPeriodoGrupoListMateriaPeriodoGrupo = em.merge(oldMateriaPeriodoIdOfMateriaPeriodoGrupoListMateriaPeriodoGrupo);
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findMateriaPeriodo(materiaPeriodo.getMateriaPeriodoPK()) != null) {
-                throw new PreexistingEntityException("MateriaPeriodo " + materiaPeriodo + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -89,13 +77,11 @@ public class MateriaPeriodoJpaController implements Serializable {
     }
 
     public void edit(MateriaPeriodo materiaPeriodo) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        materiaPeriodo.getMateriaPeriodoPK().setMateriaPensumCodigo(materiaPeriodo.getMateria().getMateriaPK().getPensumCodigo());
-        materiaPeriodo.getMateriaPeriodoPK().setMateriaCodigoMateria(materiaPeriodo.getMateria().getMateriaPK().getCodigoMateria());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            MateriaPeriodo persistentMateriaPeriodo = em.find(MateriaPeriodo.class, materiaPeriodo.getMateriaPeriodoPK());
+            MateriaPeriodo persistentMateriaPeriodo = em.find(MateriaPeriodo.class, materiaPeriodo.getId());
             Materia materiaOld = persistentMateriaPeriodo.getMateria();
             Materia materiaNew = materiaPeriodo.getMateria();
             List<MateriaPeriodoGrupo> materiaPeriodoGrupoListOld = persistentMateriaPeriodo.getMateriaPeriodoGrupoList();
@@ -104,9 +90,9 @@ public class MateriaPeriodoJpaController implements Serializable {
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListOldMateriaPeriodoGrupo : materiaPeriodoGrupoListOld) {
                 if (!materiaPeriodoGrupoListNew.contains(materiaPeriodoGrupoListOldMateriaPeriodoGrupo)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain MateriaPeriodoGrupo " + materiaPeriodoGrupoListOldMateriaPeriodoGrupo + " since its materiaPeriodo field is not nullable.");
+                    illegalOrphanMessages.add("You must retain MateriaPeriodoGrupo " + materiaPeriodoGrupoListOldMateriaPeriodoGrupo + " since its materiaPeriodoId field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -116,9 +102,9 @@ public class MateriaPeriodoJpaController implements Serializable {
                 materiaNew = em.getReference(materiaNew.getClass(), materiaNew.getMateriaPK());
                 materiaPeriodo.setMateria(materiaNew);
             }
-            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoListNew = new ArrayList<>();
+            List<MateriaPeriodoGrupo> attachedMateriaPeriodoGrupoListNew = new ArrayList<MateriaPeriodoGrupo>();
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach : materiaPeriodoGrupoListNew) {
-                materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getMateriaPeriodoGrupoPK());
+                materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach = em.getReference(materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getClass(), materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach.getId());
                 attachedMateriaPeriodoGrupoListNew.add(materiaPeriodoGrupoListNewMateriaPeriodoGrupoToAttach);
             }
             materiaPeriodoGrupoListNew = attachedMateriaPeriodoGrupoListNew;
@@ -134,12 +120,12 @@ public class MateriaPeriodoJpaController implements Serializable {
             }
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListNewMateriaPeriodoGrupo : materiaPeriodoGrupoListNew) {
                 if (!materiaPeriodoGrupoListOld.contains(materiaPeriodoGrupoListNewMateriaPeriodoGrupo)) {
-                    MateriaPeriodo oldMateriaPeriodoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = materiaPeriodoGrupoListNewMateriaPeriodoGrupo.getMateriaPeriodo();
-                    materiaPeriodoGrupoListNewMateriaPeriodoGrupo.setMateriaPeriodo(materiaPeriodo);
+                    MateriaPeriodo oldMateriaPeriodoIdOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = materiaPeriodoGrupoListNewMateriaPeriodoGrupo.getMateriaPeriodoId();
+                    materiaPeriodoGrupoListNewMateriaPeriodoGrupo.setMateriaPeriodoId(materiaPeriodo);
                     materiaPeriodoGrupoListNewMateriaPeriodoGrupo = em.merge(materiaPeriodoGrupoListNewMateriaPeriodoGrupo);
-                    if (oldMateriaPeriodoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo != null && !oldMateriaPeriodoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.equals(materiaPeriodo)) {
-                        oldMateriaPeriodoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListNewMateriaPeriodoGrupo);
-                        oldMateriaPeriodoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = em.merge(oldMateriaPeriodoOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo);
+                    if (oldMateriaPeriodoIdOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo != null && !oldMateriaPeriodoIdOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.equals(materiaPeriodo)) {
+                        oldMateriaPeriodoIdOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo.getMateriaPeriodoGrupoList().remove(materiaPeriodoGrupoListNewMateriaPeriodoGrupo);
+                        oldMateriaPeriodoIdOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo = em.merge(oldMateriaPeriodoIdOfMateriaPeriodoGrupoListNewMateriaPeriodoGrupo);
                     }
                 }
             }
@@ -147,7 +133,7 @@ public class MateriaPeriodoJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                MateriaPeriodoPK id = materiaPeriodo.getMateriaPeriodoPK();
+                Integer id = materiaPeriodo.getId();
                 if (findMateriaPeriodo(id) == null) {
                     throw new NonexistentEntityException("The materiaPeriodo with id " + id + " no longer exists.");
                 }
@@ -160,7 +146,7 @@ public class MateriaPeriodoJpaController implements Serializable {
         }
     }
 
-    public void destroy(MateriaPeriodoPK id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -168,7 +154,7 @@ public class MateriaPeriodoJpaController implements Serializable {
             MateriaPeriodo materiaPeriodo;
             try {
                 materiaPeriodo = em.getReference(MateriaPeriodo.class, id);
-                materiaPeriodo.getMateriaPeriodoPK();
+                materiaPeriodo.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The materiaPeriodo with id " + id + " no longer exists.", enfe);
             }
@@ -176,9 +162,9 @@ public class MateriaPeriodoJpaController implements Serializable {
             List<MateriaPeriodoGrupo> materiaPeriodoGrupoListOrphanCheck = materiaPeriodo.getMateriaPeriodoGrupoList();
             for (MateriaPeriodoGrupo materiaPeriodoGrupoListOrphanCheckMateriaPeriodoGrupo : materiaPeriodoGrupoListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This MateriaPeriodo (" + materiaPeriodo + ") cannot be destroyed since the MateriaPeriodoGrupo " + materiaPeriodoGrupoListOrphanCheckMateriaPeriodoGrupo + " in its materiaPeriodoGrupoList field has a non-nullable materiaPeriodo field.");
+                illegalOrphanMessages.add("This MateriaPeriodo (" + materiaPeriodo + ") cannot be destroyed since the MateriaPeriodoGrupo " + materiaPeriodoGrupoListOrphanCheckMateriaPeriodoGrupo + " in its materiaPeriodoGrupoList field has a non-nullable materiaPeriodoId field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
@@ -221,7 +207,7 @@ public class MateriaPeriodoJpaController implements Serializable {
         }
     }
 
-    public MateriaPeriodo findMateriaPeriodo(MateriaPeriodoPK id) {
+    public MateriaPeriodo findMateriaPeriodo(Integer id) {
         EntityManager em = getEntityManager();
         try {
             return em.find(MateriaPeriodo.class, id);
@@ -242,5 +228,5 @@ public class MateriaPeriodoJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

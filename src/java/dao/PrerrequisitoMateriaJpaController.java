@@ -19,7 +19,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class PrerrequisitoMateriaJpaController implements Serializable {
 
@@ -192,5 +192,5 @@ public class PrerrequisitoMateriaJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

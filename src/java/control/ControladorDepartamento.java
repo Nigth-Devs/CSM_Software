@@ -35,18 +35,10 @@ public class ControladorDepartamento extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ControladorDepartamento</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ControladorDepartamento at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        switch (request.getParameter("accion")) {
+            case "listar":
+                listarDepartamento(request, response);
+                break;
         }
     }
 
@@ -62,6 +54,7 @@ public class ControladorDepartamento extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        this.processRequest(request, response);
     }
 
     /**
@@ -75,11 +68,7 @@ public class ControladorDepartamento extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        switch (request.getParameter("accion")) {
-            case "listar":
-                listarDepartamento(request, response);
-                break;
-        }
+        this.processRequest(request, response);
     }
 
     private void listarDepartamento(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -90,7 +79,7 @@ public class ControladorDepartamento extends HttpServlet {
         List<Departamento> depar = djpa.findDepartamentoEntities();
         for (Departamento d : depar) {
             if (d.getFacultadId().getId().equals(id)) {
-                pw.println("<option value=" + d.getId() + ">" + d.getNombreDepartamento() + "</option>");
+                pw.println("<option value=" + d.getId() + ">" + d.getNombre()+ "</option>");
             }
         }
         pw.flush();

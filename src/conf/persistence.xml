@@ -30,12 +30,19 @@
     <class>dto.PrerrequisitoMateria</class>
     <class>dto.Encabezado</class>
     <class>tempo.EncabezadoTabla</class>
+    <class>dto.Tabla</class>
+    <class>dto.TablaInfo</class>
+    <class>dto.TablaSeccion</class>
+    <class>dto.TipoMateria</class>
+    <class>dto.Cumplimiento</class>
+    <class>dto.Unidad</class>
+    <class>dto.ContenidoUnidad</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/estudiante_31?zeroDateTimeBehavior=convertToNull"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/scsm?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.user" value="root"/>
-      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-      <property name="javax.persistence.jdbc.password" value="10100101"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
     </properties>
   </persistence-unit>
 </persistence>

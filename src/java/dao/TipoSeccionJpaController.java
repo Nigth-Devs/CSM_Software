@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class TipoSeccionJpaController implements Serializable {
 
@@ -36,13 +36,13 @@ public class TipoSeccionJpaController implements Serializable {
 
     public void create(TipoSeccion tipoSeccion) {
         if (tipoSeccion.getSeccionList() == null) {
-            tipoSeccion.setSeccionList(new ArrayList<>());
+            tipoSeccion.setSeccionList(new ArrayList<Seccion>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Seccion> attachedSeccionList = new ArrayList<>();
+            List<Seccion> attachedSeccionList = new ArrayList<Seccion>();
             for (Seccion seccionListSeccionToAttach : tipoSeccion.getSeccionList()) {
                 seccionListSeccionToAttach = em.getReference(seccionListSeccionToAttach.getClass(), seccionListSeccionToAttach.getId());
                 attachedSeccionList.add(seccionListSeccionToAttach);
@@ -78,7 +78,7 @@ public class TipoSeccionJpaController implements Serializable {
             for (Seccion seccionListOldSeccion : seccionListOld) {
                 if (!seccionListNew.contains(seccionListOldSeccion)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain Seccion " + seccionListOldSeccion + " since its tipoSeccionId field is not nullable.");
                 }
@@ -86,7 +86,7 @@ public class TipoSeccionJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Seccion> attachedSeccionListNew = new ArrayList<>();
+            List<Seccion> attachedSeccionListNew = new ArrayList<Seccion>();
             for (Seccion seccionListNewSeccionToAttach : seccionListNew) {
                 seccionListNewSeccionToAttach = em.getReference(seccionListNewSeccionToAttach.getClass(), seccionListNewSeccionToAttach.getId());
                 attachedSeccionListNew.add(seccionListNewSeccionToAttach);
@@ -138,7 +138,7 @@ public class TipoSeccionJpaController implements Serializable {
             List<Seccion> seccionListOrphanCheck = tipoSeccion.getSeccionList();
             for (Seccion seccionListOrphanCheckSeccion : seccionListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This TipoSeccion (" + tipoSeccion + ") cannot be destroyed since the Seccion " + seccionListOrphanCheckSeccion + " in its seccionList field has a non-nullable tipoSeccionId field.");
             }
@@ -199,5 +199,5 @@ public class TipoSeccionJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

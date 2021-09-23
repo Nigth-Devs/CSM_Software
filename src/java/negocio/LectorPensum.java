@@ -9,7 +9,7 @@ import dto.EquivalenciaMateria;
 import dto.Materia;
 import dto.MateriaPK;
 import dto.PrerrequisitoMateria;
-import dto.TipoAsignatura;
+import dto.TipoMateria;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -169,7 +169,7 @@ public class LectorPensum extends PDFTextStripper {
             Integer cre = campoValido(h.get(COL_NAMES[8]).toString().replaceAll("\\s+", ""));
             Boolean type = h.get(COL_NAMES[9]).toString().replaceAll("\\s+", "").equalsIgnoreCase("X");
             Materia m = new Materia(new MateriaPK(codigo, codigo_pensum), nombre, creditos, semestre, ht, hp, hti);
-            m.setTipoAsignaturaId(new TipoAsignatura(type ? 2 : 1));
+            m.setTipoId(new TipoMateria(type ? 2 : 1));
             List<PrerrequisitoMateria> prerreq = this.formatPrerreq(m, codigo_pensum, ((ArrayList<String>) h.get(COL_NAMES[6])));
             List<EquivalenciaMateria> equis = this.formatEquis(m, ((ArrayList<String>) h.get(COL_NAMES[10])));
             m.setEquivalenciaMateriaList(equis);

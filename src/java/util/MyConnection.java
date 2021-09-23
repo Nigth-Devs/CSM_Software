@@ -16,9 +16,9 @@ import java.sql.SQLException;
 public class MyConnection {
 
     private static Connection connection;
-    private static final String URL = "jdbc:mysql://localhost:3306/estudiante_31?zeroDateTimeBehavior=convertToNull";
+    private static final String URL = "jdbc:mysql://localhost:3306/scsm?zeroDateTimeBehavior=convertToNull";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "10100101";
+    private static final String PASSWORD = "";
 
     public static Connection getConnection() {
         try {

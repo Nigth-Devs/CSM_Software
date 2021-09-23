@@ -1,7 +1,7 @@
 <%@page import="dto.Usuario"%>
 <%
     Usuario user = (Usuario) request.getSession().getAttribute("usuario");
-    String rol = (user.getUsuarioPK().getRolId() == 1) ? "director" : "docente";
+    String rol = (user.getRolId().getId() == 1) ? "director" : "docente";
 %>
 <div class="logo-header" data-background-color="red">
     <a href="<%= request.getContextPath() + "/CSM_Software/CSM/" + rol + "/dashboard/dashboard.jsp"%>" style="text-decoration: none;">

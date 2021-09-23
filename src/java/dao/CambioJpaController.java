@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class CambioJpaController implements Serializable {
 
@@ -37,7 +37,7 @@ public class CambioJpaController implements Serializable {
 
     public void create(Cambio cambio) {
         if (cambio.getSeccionCambioList() == null) {
-            cambio.setSeccionCambioList(new ArrayList<>());
+            cambio.setSeccionCambioList(new ArrayList<SeccionCambio>());
         }
         EntityManager em = null;
         try {
@@ -48,7 +48,7 @@ public class CambioJpaController implements Serializable {
                 estadoId = em.getReference(estadoId.getClass(), estadoId.getId());
                 cambio.setEstadoId(estadoId);
             }
-            List<SeccionCambio> attachedSeccionCambioList = new ArrayList<>();
+            List<SeccionCambio> attachedSeccionCambioList = new ArrayList<SeccionCambio>();
             for (SeccionCambio seccionCambioListSeccionCambioToAttach : cambio.getSeccionCambioList()) {
                 seccionCambioListSeccionCambioToAttach = em.getReference(seccionCambioListSeccionCambioToAttach.getClass(), seccionCambioListSeccionCambioToAttach.getId());
                 attachedSeccionCambioList.add(seccionCambioListSeccionCambioToAttach);
@@ -90,7 +90,7 @@ public class CambioJpaController implements Serializable {
             for (SeccionCambio seccionCambioListOldSeccionCambio : seccionCambioListOld) {
                 if (!seccionCambioListNew.contains(seccionCambioListOldSeccionCambio)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain SeccionCambio " + seccionCambioListOldSeccionCambio + " since its cambioId field is not nullable.");
                 }
@@ -102,7 +102,7 @@ public class CambioJpaController implements Serializable {
                 estadoIdNew = em.getReference(estadoIdNew.getClass(), estadoIdNew.getId());
                 cambio.setEstadoId(estadoIdNew);
             }
-            List<SeccionCambio> attachedSeccionCambioListNew = new ArrayList<>();
+            List<SeccionCambio> attachedSeccionCambioListNew = new ArrayList<SeccionCambio>();
             for (SeccionCambio seccionCambioListNewSeccionCambioToAttach : seccionCambioListNew) {
                 seccionCambioListNewSeccionCambioToAttach = em.getReference(seccionCambioListNewSeccionCambioToAttach.getClass(), seccionCambioListNewSeccionCambioToAttach.getId());
                 attachedSeccionCambioListNew.add(seccionCambioListNewSeccionCambioToAttach);
@@ -162,7 +162,7 @@ public class CambioJpaController implements Serializable {
             List<SeccionCambio> seccionCambioListOrphanCheck = cambio.getSeccionCambioList();
             for (SeccionCambio seccionCambioListOrphanCheckSeccionCambio : seccionCambioListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Cambio (" + cambio + ") cannot be destroyed since the SeccionCambio " + seccionCambioListOrphanCheckSeccionCambio + " in its seccionCambioList field has a non-nullable cambioId field.");
             }
@@ -228,5 +228,5 @@ public class CambioJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

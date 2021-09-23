@@ -9,18 +9,18 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">
-                        Help
+                        Ayuda
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">
-                        Licenses
+                        Licencia 
                     </a>
                 </li>
             </ul>
         </nav>
         <div class="copyright ml-auto">
-            2021 &copy; All Rights Reserved.
+            2021 &copy; Reservados todos los Derechos.
             Desarrollado por: <a href="#">Nigth Devs</a>
         </div>
     </div>

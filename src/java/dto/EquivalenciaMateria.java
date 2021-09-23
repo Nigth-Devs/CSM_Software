@@ -22,31 +22,32 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "equivalencia_materia")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "EquivalenciaMateria.findAll", query = "SELECT e FROM EquivalenciaMateria e")
+    , @NamedQuery(name = "EquivalenciaMateria.findById", query = "SELECT e FROM EquivalenciaMateria e WHERE e.id = :id")
     , @NamedQuery(name = "EquivalenciaMateria.findByEquivalenciaMateria", query = "SELECT e FROM EquivalenciaMateria e WHERE e.equivalenciaMateria = :equivalenciaMateria")
-    , @NamedQuery(name = "EquivalenciaMateria.findByNombre", query = "SELECT e FROM EquivalenciaMateria e WHERE e.nombre = :nombre")
-    , @NamedQuery(name = "EquivalenciaMateria.findById", query = "SELECT e FROM EquivalenciaMateria e WHERE e.id = :id")})
+    , @NamedQuery(name = "EquivalenciaMateria.findByNombre", query = "SELECT e FROM EquivalenciaMateria e WHERE e.nombre = :nombre")})
 public class EquivalenciaMateria implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Basic(optional = false)
-    @Column(name = "equivalencia_materia")
-    private int equivalenciaMateria;
-    @Column(name = "nombre")
-    private String nombre;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @Column(name = "equivalencia_materia")
+    private int equivalenciaMateria;
+    @Basic(optional = false)
+    @Column(name = "nombre")
+    private String nombre;
     @JoinColumns({
-        @JoinColumn(name = "materia_codigo_materia", referencedColumnName = "codigo_materia")
+        @JoinColumn(name = "materia_codigo", referencedColumnName = "codigo")
         , @JoinColumn(name = "materia_pensum_codigo", referencedColumnName = "pensum_codigo")})
     @ManyToOne(optional = false)
     private Materia materia;
@@ -58,9 +59,18 @@ public class EquivalenciaMateria implements Serializable {
         this.id = id;
     }
 
-    public EquivalenciaMateria(Integer id, int equivalenciaMateria) {
+    public EquivalenciaMateria(Integer id, int equivalenciaMateria, String nombre) {
         this.id = id;
         this.equivalenciaMateria = equivalenciaMateria;
+        this.nombre = nombre;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public int getEquivalenciaMateria() {
@@ -77,14 +87,6 @@ public class EquivalenciaMateria implements Serializable {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public Materia getMateria() {
@@ -119,5 +121,5 @@ public class EquivalenciaMateria implements Serializable {
     public String toString() {
         return "dto.EquivalenciaMateria[ id=" + id + " ]";
     }
-
+    
 }

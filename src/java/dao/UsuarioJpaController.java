@@ -5,6 +5,7 @@
  */
 package dao;
 
+import dao.exceptions.IllegalOrphanException;
 import dao.exceptions.NonexistentEntityException;
 import dao.exceptions.PreexistingEntityException;
 import java.io.Serializable;
@@ -15,14 +16,14 @@ import javax.persistence.criteria.Root;
 import dto.Rol;
 import dto.Docente;
 import dto.Usuario;
-import dto.UsuarioPK;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class UsuarioJpaController implements Serializable {
 
@@ -35,38 +36,47 @@ public class UsuarioJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Usuario usuario) throws PreexistingEntityException, Exception {
-        if (usuario.getUsuarioPK() == null) {
-            usuario.setUsuarioPK(new UsuarioPK());
+    public void create(Usuario usuario) throws IllegalOrphanException, PreexistingEntityException, Exception {
+        List<String> illegalOrphanMessages = null;
+        Docente docenteOrphanCheck = usuario.getDocente();
+        if (docenteOrphanCheck != null) {
+            Usuario oldUsuarioOfDocente = docenteOrphanCheck.getUsuario();
+            if (oldUsuarioOfDocente != null) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("The Docente " + docenteOrphanCheck + " already has an item of type Usuario whose docente column cannot be null. Please make another selection for the docente field.");
+            }
         }
-        usuario.getUsuarioPK().setRolId(usuario.getRol().getId());
-        usuario.getUsuarioPK().setDocenteCodigo(usuario.getDocente().getCodigoDocente());
+        if (illegalOrphanMessages != null) {
+            throw new IllegalOrphanException(illegalOrphanMessages);
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Rol rol = usuario.getRol();
-            if (rol != null) {
-                rol = em.getReference(rol.getClass(), rol.getId());
-                usuario.setRol(rol);
+            Rol rolId = usuario.getRolId();
+            if (rolId != null) {
+                rolId = em.getReference(rolId.getClass(), rolId.getId());
+                usuario.setRolId(rolId);
             }
             Docente docente = usuario.getDocente();
             if (docente != null) {
-                docente = em.getReference(docente.getClass(), docente.getCodigoDocente());
+                docente = em.getReference(docente.getClass(), docente.getCodigo());
                 usuario.setDocente(docente);
             }
             em.persist(usuario);
-            if (rol != null) {
-                rol.getUsuarioList().add(usuario);
-                rol = em.merge(rol);
+            if (rolId != null) {
+                rolId.getUsuarioList().add(usuario);
+                rolId = em.merge(rolId);
             }
             if (docente != null) {
-                docente.getUsuarioList().add(usuario);
+                docente.setUsuario(usuario);
                 docente = em.merge(docente);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
-            if (findUsuario(usuario.getUsuarioPK()) != null) {
+            if (findUsuario(usuario.getDocenteCodigo()) != null) {
                 throw new PreexistingEntityException("Usuario " + usuario + " already exists.", ex);
             }
             throw ex;
@@ -77,48 +87,59 @@ public class UsuarioJpaController implements Serializable {
         }
     }
 
-    public void edit(Usuario usuario) throws NonexistentEntityException, Exception {
-        usuario.getUsuarioPK().setRolId(usuario.getRol().getId());
-        usuario.getUsuarioPK().setDocenteCodigo(usuario.getDocente().getCodigoDocente());
+    public void edit(Usuario usuario) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Usuario persistentUsuario = em.find(Usuario.class, usuario.getUsuarioPK());
-            Rol rolOld = persistentUsuario.getRol();
-            Rol rolNew = usuario.getRol();
+            Usuario persistentUsuario = em.find(Usuario.class, usuario.getDocenteCodigo());
+            Rol rolIdOld = persistentUsuario.getRolId();
+            Rol rolIdNew = usuario.getRolId();
             Docente docenteOld = persistentUsuario.getDocente();
             Docente docenteNew = usuario.getDocente();
-            if (rolNew != null) {
-                rolNew = em.getReference(rolNew.getClass(), rolNew.getId());
-                usuario.setRol(rolNew);
+            List<String> illegalOrphanMessages = null;
+            if (docenteNew != null && !docenteNew.equals(docenteOld)) {
+                Usuario oldUsuarioOfDocente = docenteNew.getUsuario();
+                if (oldUsuarioOfDocente != null) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("The Docente " + docenteNew + " already has an item of type Usuario whose docente column cannot be null. Please make another selection for the docente field.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            if (rolIdNew != null) {
+                rolIdNew = em.getReference(rolIdNew.getClass(), rolIdNew.getId());
+                usuario.setRolId(rolIdNew);
             }
             if (docenteNew != null) {
-                docenteNew = em.getReference(docenteNew.getClass(), docenteNew.getCodigoDocente());
+                docenteNew = em.getReference(docenteNew.getClass(), docenteNew.getCodigo());
                 usuario.setDocente(docenteNew);
             }
             usuario = em.merge(usuario);
-            if (rolOld != null && !rolOld.equals(rolNew)) {
-                rolOld.getUsuarioList().remove(usuario);
-                rolOld = em.merge(rolOld);
+            if (rolIdOld != null && !rolIdOld.equals(rolIdNew)) {
+                rolIdOld.getUsuarioList().remove(usuario);
+                rolIdOld = em.merge(rolIdOld);
             }
-            if (rolNew != null && !rolNew.equals(rolOld)) {
-                rolNew.getUsuarioList().add(usuario);
-                rolNew = em.merge(rolNew);
+            if (rolIdNew != null && !rolIdNew.equals(rolIdOld)) {
+                rolIdNew.getUsuarioList().add(usuario);
+                rolIdNew = em.merge(rolIdNew);
             }
             if (docenteOld != null && !docenteOld.equals(docenteNew)) {
-                docenteOld.getUsuarioList().remove(usuario);
+                docenteOld.setUsuario(null);
                 docenteOld = em.merge(docenteOld);
             }
             if (docenteNew != null && !docenteNew.equals(docenteOld)) {
-                docenteNew.getUsuarioList().add(usuario);
+                docenteNew.setUsuario(usuario);
                 docenteNew = em.merge(docenteNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                UsuarioPK id = usuario.getUsuarioPK();
+                Integer id = usuario.getDocenteCodigo();
                 if (findUsuario(id) == null) {
                     throw new NonexistentEntityException("The usuario with id " + id + " no longer exists.");
                 }
@@ -131,7 +152,7 @@ public class UsuarioJpaController implements Serializable {
         }
     }
 
-    public void destroy(UsuarioPK id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -139,18 +160,18 @@ public class UsuarioJpaController implements Serializable {
             Usuario usuario;
             try {
                 usuario = em.getReference(Usuario.class, id);
-                usuario.getUsuarioPK();
+                usuario.getDocenteCodigo();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The usuario with id " + id + " no longer exists.", enfe);
             }
-            Rol rol = usuario.getRol();
-            if (rol != null) {
-                rol.getUsuarioList().remove(usuario);
-                rol = em.merge(rol);
+            Rol rolId = usuario.getRolId();
+            if (rolId != null) {
+                rolId.getUsuarioList().remove(usuario);
+                rolId = em.merge(rolId);
             }
             Docente docente = usuario.getDocente();
             if (docente != null) {
-                docente.getUsuarioList().remove(usuario);
+                docente.setUsuario(null);
                 docente = em.merge(docente);
             }
             em.remove(usuario);
@@ -186,7 +207,7 @@ public class UsuarioJpaController implements Serializable {
         }
     }
 
-    public Usuario findUsuario(UsuarioPK id) {
+    public Usuario findUsuario(Integer id) {
         EntityManager em = getEntityManager();
         try {
             return em.find(Usuario.class, id);
@@ -207,5 +228,5 @@ public class UsuarioJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

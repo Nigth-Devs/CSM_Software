@@ -8,6 +8,7 @@ package dto;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "area_formacion")
@@ -42,7 +43,7 @@ public class AreaFormacion implements Serializable {
     @Basic(optional = false)
     @Column(name = "nombre")
     private String nombre;
-    @OneToMany(mappedBy = "areaDeFormacionId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "areaDeFormacionId")
     private List<Microcurriculo> microcurriculoList;
 
     public AreaFormacion() {
@@ -106,5 +107,5 @@ public class AreaFormacion implements Serializable {
     public String toString() {
         return "dto.AreaFormacion[ id=" + id + " ]";
     }
-
+    
 }

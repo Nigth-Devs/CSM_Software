@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class FacultadJpaController implements Serializable {
 
@@ -36,13 +36,13 @@ public class FacultadJpaController implements Serializable {
 
     public void create(Facultad facultad) {
         if (facultad.getDepartamentoList() == null) {
-            facultad.setDepartamentoList(new ArrayList<>());
+            facultad.setDepartamentoList(new ArrayList<Departamento>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Departamento> attachedDepartamentoList = new ArrayList<>();
+            List<Departamento> attachedDepartamentoList = new ArrayList<Departamento>();
             for (Departamento departamentoListDepartamentoToAttach : facultad.getDepartamentoList()) {
                 departamentoListDepartamentoToAttach = em.getReference(departamentoListDepartamentoToAttach.getClass(), departamentoListDepartamentoToAttach.getId());
                 attachedDepartamentoList.add(departamentoListDepartamentoToAttach);
@@ -78,7 +78,7 @@ public class FacultadJpaController implements Serializable {
             for (Departamento departamentoListOldDepartamento : departamentoListOld) {
                 if (!departamentoListNew.contains(departamentoListOldDepartamento)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain Departamento " + departamentoListOldDepartamento + " since its facultadId field is not nullable.");
                 }
@@ -86,7 +86,7 @@ public class FacultadJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Departamento> attachedDepartamentoListNew = new ArrayList<>();
+            List<Departamento> attachedDepartamentoListNew = new ArrayList<Departamento>();
             for (Departamento departamentoListNewDepartamentoToAttach : departamentoListNew) {
                 departamentoListNewDepartamentoToAttach = em.getReference(departamentoListNewDepartamentoToAttach.getClass(), departamentoListNewDepartamentoToAttach.getId());
                 attachedDepartamentoListNew.add(departamentoListNewDepartamentoToAttach);
@@ -138,7 +138,7 @@ public class FacultadJpaController implements Serializable {
             List<Departamento> departamentoListOrphanCheck = facultad.getDepartamentoList();
             for (Departamento departamentoListOrphanCheckDepartamento : departamentoListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Facultad (" + facultad + ") cannot be destroyed since the Departamento " + departamentoListOrphanCheckDepartamento + " in its departamentoList field has a non-nullable facultadId field.");
             }
@@ -199,5 +199,5 @@ public class FacultadJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

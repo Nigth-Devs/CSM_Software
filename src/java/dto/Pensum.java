@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "pensum")
@@ -34,8 +34,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Pensum.findAll", query = "SELECT p FROM Pensum p")
     , @NamedQuery(name = "Pensum.findByCodigo", query = "SELECT p FROM Pensum p WHERE p.pensumPK.codigo = :codigo")
-    , @NamedQuery(name = "Pensum.findByFechaInicioVigencia", query = "SELECT p FROM Pensum p WHERE p.fechaInicioVigencia = :fechaInicioVigencia")
     , @NamedQuery(name = "Pensum.findByProgramaCodigo", query = "SELECT p FROM Pensum p WHERE p.pensumPK.programaCodigo = :programaCodigo")
+    , @NamedQuery(name = "Pensum.findByFechaInicioVigencia", query = "SELECT p FROM Pensum p WHERE p.fechaInicioVigencia = :fechaInicioVigencia")
     , @NamedQuery(name = "Pensum.findByFechaFinVigencia", query = "SELECT p FROM Pensum p WHERE p.fechaFinVigencia = :fechaFinVigencia")
     , @NamedQuery(name = "Pensum.findByEstadoVisualizacion", query = "SELECT p FROM Pensum p WHERE p.estadoVisualizacion = :estadoVisualizacion")})
 public class Pensum implements Serializable {
@@ -147,5 +147,5 @@ public class Pensum implements Serializable {
     public String toString() {
         return "dto.Pensum[ pensumPK=" + pensumPK + " ]";
     }
-
+    
 }

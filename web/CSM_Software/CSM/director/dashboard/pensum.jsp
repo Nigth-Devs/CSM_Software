@@ -11,7 +11,7 @@
 <%@page import="negocio.AdministrarPensum"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -110,7 +110,7 @@
                                     </div>
                                     <div class="card-body d-flex align-items-end">
                                         <iframe class="materialboxed" id="contenedor" src="pensum/ver-pensum.jsp"
-                                                title="visualizar pensum" scrolling="auto" frameborder="0" height="850px"
+                                                title="visualizar pensum" scrolling="no" frameborder="0" height="850px"
                                                 width="100%" allowfullscreen></iframe>
                                     </div>
                                 </div>
@@ -146,13 +146,6 @@
                                                     <div class="modal-body">
                                                         <form action="<%=request.getContextPath()%>/ControladorPensum?accion=registrar" method="POST" enctype="multipart/form-data">
                                                             <div class="row">
-                                                                <div class="col-sm-6">
-                                                                    <div class="form-group form-group-default">
-                                                                        <label>Codigo Pensum</label>
-                                                                        <input class="form-control" type="text"
-                                                                               name="programa" placeholder="115">
-                                                                    </div>
-                                                                </div>
                                                                 <div class="col-sm-12">
                                                                     <div class="form-group form-group-default">
                                                                         <p class="small">Importe el Archivo en Formato PDF
@@ -181,7 +174,7 @@
                                                    class="display table table-striped table-hover text-center">
                                                 <thead>
                                                     <tr>
-                                                        <th>Código</th>
+                                                        <th>Pensum</th>
                                                         <th>Créditos</th>
                                                         <th>Cant Materias</th>
                                                         <th>Action</th>
@@ -189,7 +182,7 @@
                                                 </thead>
                                                 <tfoot>
                                                     <tr>
-                                                        <th>Código</th>
+                                                        <th>Pensum</th>
                                                         <th>Créditos</th>
                                                         <th>Cant Materias</th>
                                                         <th>Action</th>
@@ -197,21 +190,17 @@
                                                 </tfoot>
                                                 <tbody>
                                                     <%
-                                                        AdministrarPensum admin = new AdministrarPensum();
-                                                        Usuario u = (Usuario) request.getSession().getAttribute("usuario");
-                                                        List<Pensum> pensum = (List<Pensum>) request.getSession().getAttribute("listaPensum2");
-                                                        if (pensum != null) {
-                                                            for (Pensum p : pensum) {
-                                                                if (u.getDocente().getProgramaList().get(0).getDirectorPrograma().getCodigoDocente() == p.getPrograma().getDirectorPrograma().getCodigoDocente()) {
-                                                                    int materiaXcreditos[] = admin.creditosMateriasPensum(p.getPensumPK().getCodigo(), p.getPensumPK().getProgramaCodigo());
+                                                        Object metaData[][] = (Object[][]) request.getSession().getAttribute("pensumList");
+                                                        if (metaData != null) {
+                                                            for (Object data[] : metaData) {
                                                     %>
                                                     <tr>
-                                                        <td><%= p.getPensumPK().getProgramaCodigo() + " - " + p.getPensumPK().getCodigo()%></td>
-                                                        <td><%= materiaXcreditos[1]%></td>
-                                                        <td><%= materiaXcreditos[0]%></td>
+                                                        <td><%=data[0] %></td>
+                                                        <td><%=data[1] %></td>
+                                                        <td><%=data[2] %></td>
                                                         <td>
                                                             <div class="form-button-action">
-                                                                <a href="<%=request.getContextPath()%>/ControladorPensum?accion=ver&cod=<%=p.getPensumPK().getCodigo()%>"
+                                                                <a href="<%=request.getContextPath()%>/ControladorPensum?accion=ver&cod=<%=data[3]%>"
                                                                    type="button" data-toggle="tooltip" title=""
                                                                    class="btn btn-link btn-dark" data-original-title="Ver"
                                                                    style="color: black;">
@@ -228,7 +217,7 @@
                                                     </tr>
                                                     <%}
                                                         }
-                                                    }%>
+                                                    %>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -252,8 +241,7 @@
         <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/core/popper.min.js"></script>
         <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/core/bootstrap.min.js"></script>
         <!-- jQuery UI -->
-        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js">
-        </script>
+        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
         <script
             src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js">
         </script>
@@ -264,11 +252,12 @@
         <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/plugin/datatables/datatables.min.js"></script>
         <!-- Atlantis JS -->
         <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/atlantis.min.js"></script>
-        <!-- Atlantis DEMO methods, don't include it in your project! -->
-        <script src="<%=request.getContextPath()%>/CSM_Software/assets/js/setting-demo2.js"></script>
         <!-- Filtros Tablas JS -->
         <script>
             $(document).ready(function () {
+                document.getElementById('microcurriculo').classList.toggle('active');
+                document.getElementById('microcurriculo').classList.toggle('submenu');
+                document.getElementById('sidebarLayouts').classList.toggle('show');
                 document.getElementById('pensum').classList.toggle('active');
                 pageLength();
             });

@@ -6,86 +6,111 @@
 package dto;
 
 import java.io.Serializable;
-import javax.persistence.EmbeddedId;
+import java.util.List;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "materia_periodo_grupo")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "MateriaPeriodoGrupo.findAll", query = "SELECT m FROM MateriaPeriodoGrupo m")
-    , @NamedQuery(name = "MateriaPeriodoGrupo.findByGrupo", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.materiaPeriodoGrupoPK.grupo = :grupo")
-    , @NamedQuery(name = "MateriaPeriodoGrupo.findByDocenteCodigo", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.materiaPeriodoGrupoPK.docenteCodigo = :docenteCodigo")
-    , @NamedQuery(name = "MateriaPeriodoGrupo.findByMateriaPeriodoAnio", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.materiaPeriodoGrupoPK.materiaPeriodoAnio = :materiaPeriodoAnio")
-    , @NamedQuery(name = "MateriaPeriodoGrupo.findByMateriaPeriodoSemestreAnio", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.materiaPeriodoGrupoPK.materiaPeriodoSemestreAnio = :materiaPeriodoSemestreAnio")
-    , @NamedQuery(name = "MateriaPeriodoGrupo.findByMateriaPeriodoMateriaPensumCodigo", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.materiaPeriodoGrupoPK.materiaPeriodoMateriaPensumCodigo = :materiaPeriodoMateriaPensumCodigo")
-    , @NamedQuery(name = "MateriaPeriodoGrupo.findByMateriaPeriodoMateriaCodigoMateria", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.materiaPeriodoGrupoPK.materiaPeriodoMateriaCodigoMateria = :materiaPeriodoMateriaCodigoMateria")})
+    , @NamedQuery(name = "MateriaPeriodoGrupo.findById", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.id = :id")
+    , @NamedQuery(name = "MateriaPeriodoGrupo.findByGrupo", query = "SELECT m FROM MateriaPeriodoGrupo m WHERE m.grupo = :grupo")})
 public class MateriaPeriodoGrupo implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected MateriaPeriodoGrupoPK materiaPeriodoGrupoPK;
-    @JoinColumn(name = "docente_codigo", referencedColumnName = "codigo_docente", insertable = false, updatable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Integer id;
+    @Basic(optional = false)
+    @Column(name = "grupo")
+    private String grupo;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "materiaPeriodoGrupo")
+    private List<Cumplimiento> cumplimientoList;
+    @JoinColumn(name = "docente_codigo", referencedColumnName = "codigo")
     @ManyToOne(optional = false)
-    private Docente docente;
-    @JoinColumns({
-        @JoinColumn(name = "materia_periodo_anio", referencedColumnName = "anio", insertable = false, updatable = false)
-        , @JoinColumn(name = "materia_periodo_semestre_anio", referencedColumnName = "semestre_anio", insertable = false, updatable = false)
-        , @JoinColumn(name = "materia_periodo_materia_pensum_codigo", referencedColumnName = "materia_pensum_codigo", insertable = false, updatable = false)
-        , @JoinColumn(name = "materia_periodo_materia_codigo_materia", referencedColumnName = "materia_codigo_materia", insertable = false, updatable = false)})
+    private Docente docenteCodigo;
+    @JoinColumn(name = "materia_periodo_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private MateriaPeriodo materiaPeriodo;
+    private MateriaPeriodo materiaPeriodoId;
 
     public MateriaPeriodoGrupo() {
     }
 
-    public MateriaPeriodoGrupo(MateriaPeriodoGrupoPK materiaPeriodoGrupoPK) {
-        this.materiaPeriodoGrupoPK = materiaPeriodoGrupoPK;
+    public MateriaPeriodoGrupo(Integer id) {
+        this.id = id;
     }
 
-    public MateriaPeriodoGrupo(String grupo, int docenteCodigo, int materiaPeriodoAnio, int materiaPeriodoSemestreAnio, int materiaPeriodoMateriaPensumCodigo, int materiaPeriodoMateriaCodigoMateria) {
-        this.materiaPeriodoGrupoPK = new MateriaPeriodoGrupoPK(grupo, docenteCodigo, materiaPeriodoAnio, materiaPeriodoSemestreAnio, materiaPeriodoMateriaPensumCodigo, materiaPeriodoMateriaCodigoMateria);
+    public MateriaPeriodoGrupo(Integer id, String grupo) {
+        this.id = id;
+        this.grupo = grupo;
     }
 
-    public MateriaPeriodoGrupoPK getMateriaPeriodoGrupoPK() {
-        return materiaPeriodoGrupoPK;
+    public Integer getId() {
+        return id;
     }
 
-    public void setMateriaPeriodoGrupoPK(MateriaPeriodoGrupoPK materiaPeriodoGrupoPK) {
-        this.materiaPeriodoGrupoPK = materiaPeriodoGrupoPK;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public Docente getDocente() {
-        return docente;
+    public String getGrupo() {
+        return grupo;
     }
 
-    public void setDocente(Docente docente) {
-        this.docente = docente;
+    public void setGrupo(String grupo) {
+        this.grupo = grupo;
     }
 
-    public MateriaPeriodo getMateriaPeriodo() {
-        return materiaPeriodo;
+    @XmlTransient
+    public List<Cumplimiento> getCumplimientoList() {
+        return cumplimientoList;
     }
 
-    public void setMateriaPeriodo(MateriaPeriodo materiaPeriodo) {
-        this.materiaPeriodo = materiaPeriodo;
+    public void setCumplimientoList(List<Cumplimiento> cumplimientoList) {
+        this.cumplimientoList = cumplimientoList;
+    }
+
+    public Docente getDocenteCodigo() {
+        return docenteCodigo;
+    }
+
+    public void setDocenteCodigo(Docente docenteCodigo) {
+        this.docenteCodigo = docenteCodigo;
+    }
+
+    public MateriaPeriodo getMateriaPeriodoId() {
+        return materiaPeriodoId;
+    }
+
+    public void setMateriaPeriodoId(MateriaPeriodo materiaPeriodoId) {
+        this.materiaPeriodoId = materiaPeriodoId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (materiaPeriodoGrupoPK != null ? materiaPeriodoGrupoPK.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -96,7 +121,7 @@ public class MateriaPeriodoGrupo implements Serializable {
             return false;
         }
         MateriaPeriodoGrupo other = (MateriaPeriodoGrupo) object;
-        if ((this.materiaPeriodoGrupoPK == null && other.materiaPeriodoGrupoPK != null) || (this.materiaPeriodoGrupoPK != null && !this.materiaPeriodoGrupoPK.equals(other.materiaPeriodoGrupoPK))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -104,7 +129,7 @@ public class MateriaPeriodoGrupo implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.MateriaPeriodoGrupo[ materiaPeriodoGrupoPK=" + materiaPeriodoGrupoPK + " ]";
+        return "dto.MateriaPeriodoGrupo[ id=" + id + " ]";
     }
-
+    
 }

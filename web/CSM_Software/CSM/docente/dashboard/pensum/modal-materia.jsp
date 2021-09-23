@@ -43,61 +43,9 @@
 
     <body>
         <!-- Modal -->
-        <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
-             aria-hidden="true">
+        <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header no-bd">
-                        <h4 class="modal-title">
-                            <b>SEMINARIO INVESTIGATIVO I - 115 5306-B</b>
-                        </h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group form-group-default">
-                                        <h6><b>CONTENIDO</b></h6>
-
-                                        <p>UNIDAD 1. Medios, instrumentos, técnicas y
-                                            método en la recolección de datos e
-                                            información.</p>
-
-                                        <p>UNIDAD 2. Tabulación, análisis e interpretación
-                                            de datos.</p>
-
-
-                                        <p>UNIDAD 3. Informe y presentación de los
-                                            datos de una investigación.</p>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group form-group-default">
-                                        <h6><b>BIBLIOGRAFIA</b></h6>
-
-                                        <p>- CERDA HUGO. Los elementos de la Investigación,
-                                            como reconocerlos, diseñarlos y construirlos.
-                                            Tercera edición, 2008. Editorial El Buho.</p>
-
-                                        <p>- MUÑOZ G. Jose, QUINTERO C. Josefina. Como
-                                            desarrollar competencias investigativas en
-                                            educación. 4 edición. Editorial Magisterio.</p>
-
-                                        <p>- HERNANDEZ Sampieri; FERNANDEZ Collado; BAPTISTA
-                                            Lucio. Metodología de la investigación. McGraw
-                                            Hill. 2006.</p>
-
-                                        <p>- MÉNDEZ A. Carlos E. Metodología. McGraw Hill.
-                                            2005.</p>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
                     <div class="modal-footer no-bd">
                         <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                     </div>

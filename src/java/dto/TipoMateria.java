@@ -23,16 +23,16 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
-@Table(name = "tipo_asignatura")
+@Table(name = "tipo_materia")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "TipoAsignatura.findAll", query = "SELECT t FROM TipoAsignatura t")
-    , @NamedQuery(name = "TipoAsignatura.findById", query = "SELECT t FROM TipoAsignatura t WHERE t.id = :id")
-    , @NamedQuery(name = "TipoAsignatura.findByTipo", query = "SELECT t FROM TipoAsignatura t WHERE t.tipo = :tipo")})
-public class TipoAsignatura implements Serializable {
+    @NamedQuery(name = "TipoMateria.findAll", query = "SELECT t FROM TipoMateria t")
+    , @NamedQuery(name = "TipoMateria.findById", query = "SELECT t FROM TipoMateria t WHERE t.id = :id")
+    , @NamedQuery(name = "TipoMateria.findByTipo", query = "SELECT t FROM TipoMateria t WHERE t.tipo = :tipo")})
+public class TipoMateria implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -43,17 +43,17 @@ public class TipoAsignatura implements Serializable {
     @Basic(optional = false)
     @Column(name = "tipo")
     private String tipo;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tipoAsignaturaId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tipoId")
     private List<Materia> materiaList;
 
-    public TipoAsignatura() {
+    public TipoMateria() {
     }
 
-    public TipoAsignatura(Integer id) {
+    public TipoMateria(Integer id) {
         this.id = id;
     }
 
-    public TipoAsignatura(Integer id, String tipo) {
+    public TipoMateria(Integer id, String tipo) {
         this.id = id;
         this.tipo = tipo;
     }
@@ -93,10 +93,10 @@ public class TipoAsignatura implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof TipoAsignatura)) {
+        if (!(object instanceof TipoMateria)) {
             return false;
         }
-        TipoAsignatura other = (TipoAsignatura) object;
+        TipoMateria other = (TipoMateria) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -105,7 +105,7 @@ public class TipoAsignatura implements Serializable {
 
     @Override
     public String toString() {
-        return "dto.TipoAsignatura[ id=" + id + " ]";
+        return "dto.TipoMateria[ id=" + id + " ]";
     }
-
+    
 }

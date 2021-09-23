@@ -20,13 +20,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Entity
 @Table(name = "seccion_microcurriculo")
@@ -47,9 +48,8 @@ public class SeccionMicrocurriculo implements Serializable {
     @Column(name = "editable")
     private short editable;
     @JoinColumns({
-        @JoinColumn(name = "microcurriculo_id", referencedColumnName = "id")
-        , @JoinColumn(name = "microcurriculo_materia_pensum_codigo", referencedColumnName = "materia_pensum_codigo")
-        , @JoinColumn(name = "microcurriculo_materia_codigo_materia", referencedColumnName = "materia_codigo_materia")})
+        @JoinColumn(name = "microcurriculo_materia_codigo", referencedColumnName = "materia_codigo")
+        , @JoinColumn(name = "microcurriculo_materia_pensum_codigo", referencedColumnName = "materia_pensum_codigo")})
     @ManyToOne(optional = false)
     private Microcurriculo microcurriculo;
     @JoinColumn(name = "seccion_id", referencedColumnName = "id")
@@ -61,8 +61,8 @@ public class SeccionMicrocurriculo implements Serializable {
     private List<SeccionCambio> seccionCambioList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "seccionMicrocurriculoIdAntigua")
     private List<SeccionCambio> seccionCambioList1;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "seccionMicrocurriculo")
-    private List<TablaMicrocurriculo> tablaMicrocurriculoList;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "seccionMicrocurriculo")
+    private TablaSeccion tablaSeccion;
 
     public SeccionMicrocurriculo() {
     }
@@ -135,13 +135,12 @@ public class SeccionMicrocurriculo implements Serializable {
         this.seccionCambioList1 = seccionCambioList1;
     }
 
-    @XmlTransient
-    public List<TablaMicrocurriculo> getTablaMicrocurriculoList() {
-        return tablaMicrocurriculoList;
+    public TablaSeccion getTablaSeccion() {
+        return tablaSeccion;
     }
 
-    public void setTablaMicrocurriculoList(List<TablaMicrocurriculo> tablaMicrocurriculoList) {
-        this.tablaMicrocurriculoList = tablaMicrocurriculoList;
+    public void setTablaSeccion(TablaSeccion tablaSeccion) {
+        this.tablaSeccion = tablaSeccion;
     }
 
     @Override
@@ -168,5 +167,5 @@ public class SeccionMicrocurriculo implements Serializable {
     public String toString() {
         return "dto.SeccionMicrocurriculo[ id=" + id + " ]";
     }
-
+    
 }

@@ -12,7 +12,7 @@ import javax.persistence.Embeddable;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 @Embeddable
 public class PensumPK implements Serializable {
@@ -76,5 +76,5 @@ public class PensumPK implements Serializable {
     public String toString() {
         return "dto.PensumPK[ codigo=" + codigo + ", programaCodigo=" + programaCodigo + " ]";
     }
-
+    
 }

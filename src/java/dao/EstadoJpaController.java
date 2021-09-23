@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Manuel
+ * @author Sachikia
  */
 public class EstadoJpaController implements Serializable {
 
@@ -36,13 +36,13 @@ public class EstadoJpaController implements Serializable {
 
     public void create(Estado estado) {
         if (estado.getCambioList() == null) {
-            estado.setCambioList(new ArrayList<>());
+            estado.setCambioList(new ArrayList<Cambio>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Cambio> attachedCambioList = new ArrayList<>();
+            List<Cambio> attachedCambioList = new ArrayList<Cambio>();
             for (Cambio cambioListCambioToAttach : estado.getCambioList()) {
                 cambioListCambioToAttach = em.getReference(cambioListCambioToAttach.getClass(), cambioListCambioToAttach.getId());
                 attachedCambioList.add(cambioListCambioToAttach);
@@ -78,7 +78,7 @@ public class EstadoJpaController implements Serializable {
             for (Cambio cambioListOldCambio : cambioListOld) {
                 if (!cambioListNew.contains(cambioListOldCambio)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain Cambio " + cambioListOldCambio + " since its estadoId field is not nullable.");
                 }
@@ -86,7 +86,7 @@ public class EstadoJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Cambio> attachedCambioListNew = new ArrayList<>();
+            List<Cambio> attachedCambioListNew = new ArrayList<Cambio>();
             for (Cambio cambioListNewCambioToAttach : cambioListNew) {
                 cambioListNewCambioToAttach = em.getReference(cambioListNewCambioToAttach.getClass(), cambioListNewCambioToAttach.getId());
                 attachedCambioListNew.add(cambioListNewCambioToAttach);
@@ -138,7 +138,7 @@ public class EstadoJpaController implements Serializable {
             List<Cambio> cambioListOrphanCheck = estado.getCambioList();
             for (Cambio cambioListOrphanCheckCambio : cambioListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Estado (" + estado + ") cannot be destroyed since the Cambio " + cambioListOrphanCheckCambio + " in its cambioList field has a non-nullable estadoId field.");
             }
@@ -199,5 +199,5 @@ public class EstadoJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }
